@@ -1,0 +1,13 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=PROBE
+Comment=PROBE P2P Cryptocurrency
+Comment[fr]=PROBE, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=PROBE, eşten eşe kriptografik sanal para birimi
+Comment[es]=PROBE, una criptomoneda P2P
+Exec=/usr/bin/probe-qt
+Terminal=false
+Type=Application
+Icon=/usr/share/pixmaps/bitcoin80.xpm
+MimeType=x-scheme-handler/probe;
+Categories=Office;

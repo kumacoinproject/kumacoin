@@ -1,0 +1,2 @@
+debian/bin/probed usr/bin
+src/probed usr/lib/probe
