@@ -389,6 +389,9 @@
            <height>100</height>
           </size>
          </property>
+         <property name="styleSheet">
+          <string notr="true">background-color: #ffffff; color: #000000;border: 1px;</string>
+         </property>
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -415,7 +418,7 @@
          <item>
           <widget class="QLineEdit" name="lineEdit">
            <property name="styleSheet">
-            <string notr="true">color:#000000;</string>
+            <string notr="true">background-color:#ffffff;color:#000000;</string>
            </property>
           </widget>
          </item>

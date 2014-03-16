@@ -200,7 +200,7 @@ RPCConsole::RPCConsole(QWidget *parent) :
     // Install event filter for up and down arrow
     ui->lineEdit->installEventFilter(this);
     ui->messagesWidget->installEventFilter(this);
-
+    ui->messagesWidget->setStyleSheet("{background-color:#ffffff;color:#000000;}");
     connect(ui->clearButton, SIGNAL(clicked()), this, SLOT(clear()));
 
     // set OpenSSL version label
@@ -304,9 +304,9 @@ void RPCConsole::clear()
 
     // Set default style sheet
     ui->messagesWidget->document()->setDefaultStyleSheet(
-                "table { }"
+                "table { background-color:#ffffff; color:#000000; }"
                 "td.time { color: #808080; padding-top: 3px; } "
-                "td.message { font-family: Monospace; font-size: 12px; } "
+                "td.message { color: #000000; font-family: Monospace; font-size: 12px; } "
                 "td.cmd-request { color: #006060; } "
                 "td.cmd-error { color: red; } "
                 "b { color: #006060; } "

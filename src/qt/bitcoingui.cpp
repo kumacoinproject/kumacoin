@@ -194,7 +194,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     rpcConsole = new RPCConsole(this);
     connect(openRPCConsoleAction, SIGNAL(triggered()), rpcConsole, SLOT(show()));
-    rpcConsole->setStyleSheet("QTabBar::tab { color:#000000; }");
+    rpcConsole->setObjectName("rpcConsole");
+    rpcConsole->setStyleSheet("#rpcConsole QTextEdit { background-color:#ffffff;color:#000000; } QTabBar::tab { color:#000000; }");
     // Clicking on "Verify Message" in the address book sends you to the verify message tab
     connect(addressBookPage, SIGNAL(verifyMessage(QString)), this, SLOT(gotoVerifyMessageTab(QString)));
     // Clicking on "Sign Message" in the receive coins page sends you to the sign message tab

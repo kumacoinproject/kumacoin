@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QToolTip { color:#ffffff;background-color:#000000; }</string>
+  </property>
   <property name="frameShape">
    <enum>QFrame::StyledPanel</enum>
   </property>
@@ -52,7 +55,7 @@
    <item row="5" column="1">
     <widget class="BitcoinAmountField" name="payAmount">
      <property name="styleSheet">
-      <string notr="true">color:#000000;</string>
+      <string notr="true">background-color:#ffffff;color:#000000;</string>
      </property>
     </widget>
    </item>
@@ -70,7 +73,7 @@
         <string>Enter a label for this address to add it to your address book</string>
        </property>
        <property name="styleSheet">
-        <string notr="true">color:#000000;</string>
+        <string notr="true">background-color:#ffffff;color:#000000;</string>
        </property>
       </widget>
      </item>
@@ -100,7 +103,7 @@
         <string>The address to send the payment to  (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</string>
        </property>
        <property name="styleSheet">
-        <string notr="true">color:#000000;</string>
+        <string notr="true">background-color:#ffffff; color:#000000;</string>
        </property>
        <property name="maxLength">
         <number>34</number>

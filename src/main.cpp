@@ -1119,36 +1119,55 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
         
     int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
 
-    CBigNum bnNew;
-    bnNew.SetCompact(pindexPrev->nBits);
-    if(!fProofOfStake)
+    if(pindexLast->nHeight < 8600)
     {
-	static const int64	BlocksTargetSpacing	= 128; // 128 seconds
-	unsigned int	TimeDaySeconds	= 60 * 60 * 24;
-	int64	PastSecondsMin	= TimeDaySeconds * 0.125;
-	int64	PastSecondsMax	= TimeDaySeconds * 7;
-	uint64	PastBlocksMin	= PastSecondsMin / BlocksTargetSpacing;
-	uint64	PastBlocksMax	= PastSecondsMax / BlocksTargetSpacing;	//7 days of blocks
+	    CBigNum bnNew;
+	    bnNew.SetCompact(pindexPrev->nBits);
+	    if(!fProofOfStake)
+	    {
+		static const int64	BlocksTargetSpacing	= 128; // 128 seconds
+		unsigned int	TimeDaySeconds	= 60 * 60 * 24;
+		int64	PastSecondsMin	= TimeDaySeconds * 0.125;
+		int64	PastSecondsMax	= TimeDaySeconds * 7;
+		uint64	PastBlocksMin	= PastSecondsMin / BlocksTargetSpacing;
+		uint64	PastBlocksMax	= PastSecondsMax / BlocksTargetSpacing;	//7 days of blocks
 
-	  return KimotoGravityWell(pindexLast, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax);
+		  return KimotoGravityWell(pindexLast, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax);
+	    }
+	    else
+	    {
+		    if (fDebug)
+			printf("Retarget for Proof of Stake");
+
+		    // PROBE: target change every block
+		    // PROBE: retarget with exponential moving toward target spacing
+	    	int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
+		int64 nInterval = nTargetTimespan / nTargetSpacing;
+		bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+		bnNew /= ((nInterval + 1) * nTargetSpacing);
+	    }
+
+	    if (bnNew > bnProofOfWorkLimit)
+		bnNew = bnProofOfWorkLimit;
+
+	    return bnNew.GetCompact();
     }
     else
     {
-            if (fDebug)
-		printf("Retarget for Proof of Stake");
+		// PROBE: target change every block
+		// PROBE: retarget with exponential moving toward target spacing
+		CBigNum bnNew;
+		bnNew.SetCompact(pindexPrev->nBits);
+	    	int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
+		int64 nInterval = nTargetTimespan / nTargetSpacing;
+		bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+		bnNew /= ((nInterval + 1) * nTargetSpacing);
 
-            // PROBE: target change every block
-	    // PROBE: retarget with exponential moving toward target spacing
-    	int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
-	int64 nInterval = nTargetTimespan / nTargetSpacing;
-	bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-	bnNew /= ((nInterval + 1) * nTargetSpacing);
+		if (bnNew > bnProofOfWorkLimit)
+		bnNew = bnProofOfWorkLimit;
+
+		return bnNew.GetCompact();
     }
-
-    if (bnNew > bnProofOfWorkLimit)
-        bnNew = bnProofOfWorkLimit;
-
-    return bnNew.GetCompact();
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)
