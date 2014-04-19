@@ -69,7 +69,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole(0)
 {
     resize(850, 550);
-    setWindowTitle(tr("KumaCoin") + " - " + tr("Secure Capsule"));
+    setWindowTitle(tr("KumaCoin") + " - " + tr("Wallet"));
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -79,9 +79,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 #endif
     // Accept D&D of URIs
     setAcceptDrops(true);
-
-    setObjectName("kumacoinApp");
-    setStyleSheet("color:#ffffff;background-image: url(:icons/subtlecarbon) repeat-xy;");// #kumacoinApp { background-image: url(:icons/bottombars) repeat-x;background-position: bottom left; }");
 
     // Create actions for the toolbar, menu bar and tray/dock icon
     createActions();
@@ -97,8 +94,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     // Create tabs
     overviewPage = new OverviewPage();
-    overviewPage->setObjectName("overviewPage");
-    overviewPage->setStyleSheet("#kumacoinApp { background-image: url(:icons/bottombars);background-repeat: repeat-x;background-position: bottom left;} QToolTip {color:#ffffff;background-color:#000000;}");
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -124,14 +119,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     // Create status bar
     statusBar();
-
-    overviewPage->setStyleSheet("QToolTip { color: #fff; background-color: #202020; border: none; }");
-    transactionsPage->setStyleSheet("QToolTip { color: #fff; background-color: #202020; border: none; } QTableView { background-color: #22262A; alternate-background-color: #292E33; } QHeaderView { color: #000000; }");
-    addressBookPage->setStyleSheet("QToolTip { color: #fff; background-color: #202020; border: none; }");
-    receiveCoinsPage->setStyleSheet("QToolTip { color: #fff; background-color: #202020; border: none; } QTableView { background-color: #22262A; alternate-background-color: #292E33; } QHeaderView { color: #000000; }");
-    sendCoinsPage->setStyleSheet("QToolTip { color: #fff; background-color: #202020; border: none; }");
-
-    statusBar()->setStyleSheet("QToolTip { color: #fff; background-color: #202020; border: none; }");
 
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame();
@@ -171,19 +158,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     statusBar()->addWidget(progressBarLabel);
     statusBar()->addWidget(progressBar);
     statusBar()->addPermanentWidget(frameBlocks);
-    statusBar()->setObjectName("statusBarMain");
-    statusBar()->setStyleSheet("#statusBarMain { background-image: url(:icons/bottombars);background-repeat: repeat-x;background-position: top left;} QToolTip {color:#ffffff;background-color:#000000;border:0px;}");
-
-
-    labelEncryptionIcon->setObjectName("labelEncryptionIcon");
-    labelConnectionsIcon->setObjectName("labelConnectionsIcon");
-    labelBlocksIcon->setObjectName("labelBlocksIcon");
-    labelEncryptionIcon->setStyleSheet("#labelEncryptionIcon QToolTip {color:#ffffff;background-color:#000000;}");
-    labelConnectionsIcon->setStyleSheet("#labelConnectionsIcon QToolTip {color:#ffffff;background-color:#000000;}");
-    labelBlocksIcon->setStyleSheet("#labelBlocksIcon QToolTip {color:#ffffff;background-color:#000000;}");
 
     syncIconMovie = new QMovie(":/movies/update_spinner", "mng", this);
-	// this->setStyleSheet("background-color: #effbef;");
 
     // Clicking on a transaction on the overview page simply sends you to transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), this, SLOT(gotoHistoryPage()));
@@ -194,8 +170,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     rpcConsole = new RPCConsole(this);
     connect(openRPCConsoleAction, SIGNAL(triggered()), rpcConsole, SLOT(show()));
-    rpcConsole->setObjectName("rpcConsole");
-    rpcConsole->setStyleSheet("#rpcConsole QTextEdit { background-color:#ffffff;color:#000000; } QTabBar::tab { color:#000000; }");
+
     // Clicking on "Verify Message" in the address book sends you to the verify message tab
     connect(addressBookPage, SIGNAL(verifyMessage(QString)), this, SLOT(gotoVerifyMessageTab(QString)));
     // Clicking on "Sign Message" in the receive coins page sends you to the sign message tab
@@ -217,31 +192,31 @@ void BitcoinGUI::createActions()
 {
     QActionGroup *tabGroup = new QActionGroup(this);
 
-    overviewAction = new QAction(QIcon(":/icons/overview"), tr("&Capsule Status"), this);
+    overviewAction = new QAction(QIcon(":/icons/overview"), tr("&Overview"), this);
     overviewAction->setToolTip(tr("Show general overview of wallet"));
     overviewAction->setCheckable(true);
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
-    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Dispatch KumaCoin"), this);
+    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send coins"), this);
     sendCoinsAction->setToolTip(tr("Send coins to a KumaCoin address"));
     sendCoinsAction->setCheckable(true);
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     tabGroup->addAction(sendCoinsAction);
 
-    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&KumaCoin Docking"), this);
+    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&Receive coins"), this);
     receiveCoinsAction->setToolTip(tr("Show the list of addresses for receiving payments"));
     receiveCoinsAction->setCheckable(true);
     receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
     tabGroup->addAction(receiveCoinsAction);
 
-    historyAction = new QAction(QIcon(":/icons/history"), tr("&Capsule Log"), this);
+    historyAction = new QAction(QIcon(":/icons/history"), tr("&Transactions"), this);
     historyAction->setToolTip(tr("Browse transaction history"));
     historyAction->setCheckable(true);
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(historyAction);
 
-    addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Data Bank"), this);
+    addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Address Book"), this);
     addressBookAction->setToolTip(tr("Edit the list of stored addresses and labels"));
     addressBookAction->setCheckable(true);
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
@@ -272,17 +247,17 @@ void BitcoinGUI::createActions()
     optionsAction->setToolTip(tr("Modify configuration options for KumaCoin"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
     toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
-    encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Capsule..."), this);
-    encryptWalletAction->setToolTip(tr("Encrypt or decrypt capsule"));
+    encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
+    encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
     encryptWalletAction->setCheckable(true);
-    backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Capsule..."), this);
-    backupWalletAction->setToolTip(tr("Backup capsule to another location"));
+    backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
+    backupWalletAction->setToolTip(tr("Backup wallet to another location"));
     changePassphraseAction = new QAction(QIcon(":/icons/key"), tr("&Change Passphrase..."), this);
-    changePassphraseAction->setToolTip(tr("Change the passphrase used for Capsule encryption"));
+    changePassphraseAction->setToolTip(tr("Change the passphrase used for wallet encryption"));
     signMessageAction = new QAction(QIcon(":/icons/edit"), tr("Sign &message..."), this);
     verifyMessageAction = new QAction(QIcon(":/icons/transaction_0"), tr("&Verify message..."), this);
 
-    exportAction = new QAction(QIcon(":/icons/export"), tr("&Extraction..."), this);
+    exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
@@ -317,28 +292,18 @@ void BitcoinGUI::createMenuBar()
     file->addAction(verifyMessageAction);
     file->addSeparator();
     file->addAction(quitAction);
-    file->setObjectName("fileMenu");
 
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
     settings->addAction(encryptWalletAction);
     settings->addAction(changePassphraseAction);
     settings->addSeparator();
     settings->addAction(optionsAction);
-    settings->setObjectName("settingsMenu");
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
     help->addSeparator();
     help->addAction(aboutAction);
     help->addAction(aboutQtAction);
-    help->setObjectName("aboutMenu");
-
-    file->setStyleSheet("QMenu#fileMenu { color: #ffffff; } QMenu::item#fileMenu { background-color: transparent;color:#ffffff; } QMenu::item:selected#fileMenu { background-color:#888888;color:#ffffff; }");
-    settings->setStyleSheet("QMenu#settingsMenu { color: #ffffff; } QMenu::item#settingsMenu { background-color: transparent;color:#ffffff; } QMenu::item:selected#settingsMenu { background-color:#888888;color:#ffffff; }");
-    help->setStyleSheet("QMenu#aboutMenu { color: #ffffff; } QMenu::item#aboutMenu { background-color: transparent;color:#ffffff; } QMenu::item:selected#aboutMenu { background-color:#888888;color:#ffffff; }");
-
-
-    appMenuBar->setStyleSheet("border: 1px solid #202020; color: #000000; background-color: #eeeeee;");
 }
 
 void BitcoinGUI::createToolBars()
@@ -354,11 +319,6 @@ void BitcoinGUI::createToolBars()
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar2->addAction(exportAction);
-
-    toolbar->setObjectName("toolbarMain");
-    toolbar2->setObjectName("toolbarExport");
-    toolbar->setStyleSheet("QToolButton:hover { border: 2px solid #42D6FF; } QToolButton:checked { border: 2px solid #3ABEE5; } #toolbarMain { background-image: url(:icons/subtlecarbon);background-repeat: repeat-xy;border: 2px solid #101010;} QToolTip { color: #fff; background-color: #202020; border: none; }");
-    toolbar2->setStyleSheet("QToolButton:hover { border: 2px solid #42D6FF; } QToolButton:checked { border: 2px solid #3ABEE5; } #toolbarExport { background-image: url(:icons/subtlecarbon);background-repeat: repeat-xy;border: 2px solid #101010;} QToolTip { color: #fff; background-color: #202020; border: none; }");
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
@@ -557,8 +517,6 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
         progressBarLabel->setVisible(true);
         progressBar->setVisible(false);
     }
-
-	tooltip = tr("Current difficulty is %1.").arg(clientModel->GetDifficulty()) + QString("<br>") + tooltip;
 
     QDateTime lastBlockDate = clientModel->getLastBlockDate();
     int secs = lastBlockDate.secsTo(QDateTime::currentDateTime());
