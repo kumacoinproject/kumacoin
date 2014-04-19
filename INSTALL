@@ -1,9 +1,9 @@
-Building PROBE
+Building KumaCoin
 
-See doc/readme-qt.rst for instructions on building PROBE QT,
+See doc/readme-qt.rst for instructions on building KumaCoin QT,
 the intended-for-end-users, nice-graphical-interface, reference
-implementation of PROBE.
+implementation of KumaCoin.
 
-See doc/build-*.txt for instructions on building PROBEd,
+See doc/build-*.txt for instructions on building KumaCoind,
 the intended-for-services, no-graphical-interface, reference
-implementation of PROBE.
+implementation of KumaCoin.

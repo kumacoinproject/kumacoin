@@ -4,13 +4,13 @@ set -e
 
 umask 077
 
-basedir=~/.probe
+basedir=~/.kumacoin
 dbfile="$basedir/DB_CONFIG"
-cfgfile="$basedir/probe.conf"
+cfgfile="$basedir/kumacoin.conf"
 
 [ -e "$basedir" ] || mkdir "$basedir"
 
-# probe does not clean up DB log files by default
+# kumacoin does not clean up DB log files by default
 [ -e "$dbfile" ] || echo 'set_flags DB_LOG_AUTOREMOVE' > "$dbfile"
 
-exec /usr/lib/probe/probe-qt "$@"
+exec /usr/lib/kumacoin/kumacoin-qt "$@"

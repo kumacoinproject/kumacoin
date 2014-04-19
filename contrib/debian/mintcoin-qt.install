@@ -1,5 +1,5 @@
-probe-qt usr/bin
+kumacoin-qt usr/bin
 share/pixmaps/bitcoin32.xpm usr/share/pixmaps
 share/pixmaps/bitcoin80.xpm usr/share/pixmaps
-debian/probe-qt.desktop usr/share/applications
-debian/probe-qt.protocol usr/share/kde4/services/
+debian/kumacoin-qt.desktop usr/share/applications
+debian/kumacoin-qt.protocol usr/share/kde4/services/

@@ -205,7 +205,7 @@ void OverviewPage::setModel(WalletModel *model)
         //connect(ui->unlockWalletButton, SIGNAL(clicked()), this, SLOT(unlockWallet()));
     }
 
-    // update the display unit, to not use the default ("PROBE")
+    // update the display unit, to not use the default ("KumaCoin")
     updateDisplayUnit();
 }
 

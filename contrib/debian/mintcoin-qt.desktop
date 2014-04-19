@@ -1,13 +1,13 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=PROBE
-Comment=PROBE P2P Cryptocurrency
-Comment[fr]=PROBE, monnaie virtuelle cryptographique pair à pair
-Comment[tr]=PROBE, eşten eşe kriptografik sanal para birimi
-Comment[es]=PROBE, una criptomoneda P2P
-Exec=/usr/bin/probe-qt
+Name=KumaCoin
+Comment=KumaCoin P2P Cryptocurrency
+Comment[fr]=KumaCoin, monnaie virtuelle cryptographique pair à pair
+Comment[tr]=KumaCoin, eşten eşe kriptografik sanal para birimi
+Comment[es]=KumaCoin, una criptomoneda P2P
+Exec=/usr/bin/kumacoin-qt
 Terminal=false
 Type=Application
 Icon=/usr/share/pixmaps/bitcoin80.xpm
-MimeType=x-scheme-handler/probe;
+MimeType=x-scheme-handler/kumacoin;
 Categories=Office;

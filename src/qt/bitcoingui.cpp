@@ -69,7 +69,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole(0)
 {
     resize(850, 550);
-    setWindowTitle(tr("PROBE") + " - " + tr("Secure Capsule"));
+    setWindowTitle(tr("KumaCoin") + " - " + tr("Secure Capsule"));
 #ifndef Q_OS_MAC
     qApp->setWindowIcon(QIcon(":icons/bitcoin"));
     setWindowIcon(QIcon(":icons/bitcoin"));
@@ -80,8 +80,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Accept D&D of URIs
     setAcceptDrops(true);
 
-    setObjectName("probeApp");
-    setStyleSheet("color:#ffffff;background-image: url(:icons/subtlecarbon) repeat-xy;");// #probeApp { background-image: url(:icons/bottombars) repeat-x;background-position: bottom left; }");
+    setObjectName("kumacoinApp");
+    setStyleSheet("color:#ffffff;background-image: url(:icons/subtlecarbon) repeat-xy;");// #kumacoinApp { background-image: url(:icons/bottombars) repeat-x;background-position: bottom left; }");
 
     // Create actions for the toolbar, menu bar and tray/dock icon
     createActions();
@@ -98,7 +98,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Create tabs
     overviewPage = new OverviewPage();
     overviewPage->setObjectName("overviewPage");
-    overviewPage->setStyleSheet("#probeApp { background-image: url(:icons/bottombars);background-repeat: repeat-x;background-position: bottom left;} QToolTip {color:#ffffff;background-color:#000000;}");
+    overviewPage->setStyleSheet("#kumacoinApp { background-image: url(:icons/bottombars);background-repeat: repeat-x;background-position: bottom left;} QToolTip {color:#ffffff;background-color:#000000;}");
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -223,13 +223,13 @@ void BitcoinGUI::createActions()
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
-    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Dispatch PROBE"), this);
-    sendCoinsAction->setToolTip(tr("Send coins to a PROBE address"));
+    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Dispatch KumaCoin"), this);
+    sendCoinsAction->setToolTip(tr("Send coins to a KumaCoin address"));
     sendCoinsAction->setCheckable(true);
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     tabGroup->addAction(sendCoinsAction);
 
-    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&PROBE Docking"), this);
+    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&KumaCoin Docking"), this);
     receiveCoinsAction->setToolTip(tr("Show the list of addresses for receiving payments"));
     receiveCoinsAction->setCheckable(true);
     receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
@@ -262,14 +262,14 @@ void BitcoinGUI::createActions()
     quitAction->setToolTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(QIcon(":/icons/bitcoin"), tr("&About PROBE"), this);
-    aboutAction->setToolTip(tr("Show information about PROBE"));
+    aboutAction = new QAction(QIcon(":/icons/bitcoin"), tr("&About KumaCoin"), this);
+    aboutAction->setToolTip(tr("Show information about KumaCoin"));
     aboutAction->setMenuRole(QAction::AboutRole);
     aboutQtAction = new QAction(QIcon(":/trolltech/qmessagebox/images/qtlogo-64.png"), tr("About &Qt"), this);
     aboutQtAction->setToolTip(tr("Show information about Qt"));
     aboutQtAction->setMenuRole(QAction::AboutQtRole);
     optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
-    optionsAction->setToolTip(tr("Modify configuration options for PROBE"));
+    optionsAction->setToolTip(tr("Modify configuration options for KumaCoin"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
     toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Capsule..."), this);
@@ -378,7 +378,7 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
 #endif
             if(trayIcon)
             {
-                trayIcon->setToolTip(tr("PROBE client") + QString(" ") + tr("[testnet]"));
+                trayIcon->setToolTip(tr("KumaCoin client") + QString(" ") + tr("[testnet]"));
                 trayIcon->setIcon(QIcon(":/icons/toolbar_testnet"));
                 toggleHideAction->setIcon(QIcon(":/icons/toolbar_testnet"));
             }
@@ -438,7 +438,7 @@ void BitcoinGUI::createTrayIcon()
     trayIcon = new QSystemTrayIcon(this);
     trayIconMenu = new QMenu(this);
     trayIcon->setContextMenu(trayIconMenu);
-    trayIcon->setToolTip(tr("PROBE client"));
+    trayIcon->setToolTip(tr("KumaCoin client"));
     trayIcon->setIcon(QIcon(":/icons/toolbar"));
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
@@ -507,7 +507,7 @@ void BitcoinGUI::setNumConnections(int count)
     default: icon = ":/icons/connect_4"; break;
     }
     labelConnectionsIcon->setPixmap(QIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-    labelConnectionsIcon->setToolTip(tr("%n active connection(s) to PROBE network", "", count));
+    labelConnectionsIcon->setToolTip(tr("%n active connection(s) to KumaCoin network", "", count));
 }
 
 void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
@@ -799,7 +799,7 @@ void BitcoinGUI::dropEvent(QDropEvent *event)
         if (nValidUrisFound)
             gotoSendCoinsPage();
         else
-            notificator->notify(Notificator::Warning, tr("URI handling"), tr("URI can not be parsed! This can be caused by an invalid PROBE address or malformed URI parameters."));
+            notificator->notify(Notificator::Warning, tr("URI handling"), tr("URI can not be parsed! This can be caused by an invalid KumaCoin address or malformed URI parameters."));
     }
 
     event->acceptProposedAction();
@@ -814,7 +814,7 @@ void BitcoinGUI::handleURI(QString strURI)
         gotoSendCoinsPage();
     }
     else
-        notificator->notify(Notificator::Warning, tr("URI handling"), tr("URI can not be parsed! This can be caused by an invalid PROBE address or malformed URI parameters."));
+        notificator->notify(Notificator::Warning, tr("URI handling"), tr("URI can not be parsed! This can be caused by an invalid KumaCoin address or malformed URI parameters."));
 }
 
 void BitcoinGUI::setEncryptionStatus(int status)

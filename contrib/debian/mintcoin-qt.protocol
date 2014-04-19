@@ -1,6 +1,6 @@
 [Protocol]
-exec=probe-qt '%u'
-protocol=probe
+exec=kumacoin-qt '%u'
+protocol=kumacoin
 input=none
 output=none
 helper=true

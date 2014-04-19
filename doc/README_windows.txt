@@ -1,10 +1,10 @@
 
-Copyright (c) 2013-2014 PROBE Developers
+Copyright (c) 2013-2014 KumaCoin Developers
 
 
-PROBE 0.3.0 BETA
+KumaCoin 0.3.0 BETA
 
-Copyright (c) 2013-2014 PROBE Developers
+Copyright (c) 2013-2014 KumaCoin Developers
 Copyright (c) 2013 NovaCoin Developers
 Copyright (c) 2011-2012 Bitcoin Developers
 Distributed under the MIT/X11 software license, see the accompanying
@@ -16,7 +16,7 @@ cryptographic software written by Eric Young (eay@cryptsoft.com).
 
 Intro
 -----
-PROBE is a free open source project derived from NovaCoin, with
+KumaCoin is a free open source project derived from NovaCoin, with
 the goal of providing a long-term energy-efficient scrypt-based crypto-currency.
 Built on the foundation of Bitcoin and NovaCoin, innovations such as proof-of-stake
 help further advance the field of crypto-currency.
@@ -25,28 +25,28 @@ Setup
 -----
 After completing windows setup then run windows command line (cmd)
   cd daemon
-  probed
-You would need to create a configuration file probe.conf in the default
-wallet directory. Grant access to probed.exe in anti-virus and firewall
+  kumacoind
+You would need to create a configuration file kumacoin.conf in the default
+wallet directory. Grant access to kumacoind.exe in anti-virus and firewall
 applications if necessary.
 
 The software automatically finds other nodes to connect to.  You can
 enable Universal Plug and Play (UPnP) with your router/firewall
 or forward port 12788 (TCP) to your computer so you can receive
-incoming connections.  PROBE works without incoming connections,
-but allowing incoming connections helps the PROBE network.
+incoming connections.  KumaCoin works without incoming connections,
+but allowing incoming connections helps the KumaCoin network.
 
 Upgrade
 -------
 All you existing coins/transactions should be intact with the upgrade.
 To upgrade first backup wallet
-probed backupwallet <destination_backup_file>
-Then shutdown probed by
-probed stop
-Start up the new probed.
+kumacoind backupwallet <destination_backup_file>
+Then shutdown kumacoind by
+kumacoind stop
+Start up the new kumacoind.
 
 
-See the documentation/wiki at the PROBE site:
-  http://probe.cc/
+See the documentation/wiki at the KumaCoin site:
+  http://kumacoin.cc/
 for help and more information.
 

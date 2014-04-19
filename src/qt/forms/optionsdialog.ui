@@ -83,10 +83,10 @@
        <item>
         <widget class="QCheckBox" name="bitcoinAtStartup">
          <property name="toolTip">
-          <string>Automatically start PROBE after logging in to the system.</string>
+          <string>Automatically start KumaCoin after logging in to the system.</string>
          </property>
          <property name="text">
-          <string>&amp;Start PROBE on system login</string>
+          <string>&amp;Start KumaCoin on system login</string>
          </property>
         </widget>
        </item>
