@@ -59,7 +59,7 @@ script: |
   export LD_PRELOAD=/usr/lib/faketime/libfaketime.so.1
   export FAKETIME=$REFERENCE_DATETIME
   export TZ=UTC
-  make -f makefile.linux-mingw $MAKEOPTS DEPSDIR=$HOME/build ppcoind.exe USE_UPNP=1 DEBUGFLAGS="-frandom-seed=PROBE"
+  make -f makefile.linux-mingw $MAKEOPTS DEPSDIR=$HOME/build probed.exe USE_UPNP=1 DEBUGFLAGS="-frandom-seed=PROBE"
   i586-mingw32msvc-strip probed.exe
   mkdir $OUTDIR/daemon
   cp probed.exe $OUTDIR/daemon
@@ -71,4 +71,4 @@ script: |
   cp ../../release/* ../release/
   cp ../../src/*.exe .
   makensis ../share/setup.nsi
-  cp ../share/ppcoin-*-win32-setup.exe $OUTDIR/
+  cp ../share/PROBE-*-win32-setup.exe $OUTDIR/
