@@ -68,4 +68,8 @@ script: |
     $(find openssl-* -name '*.a' -o -name '*.h' | sort) \
     $(find miniupnpc -name '*.h' -o -name 'libminiupnpc.a' | sort)
   # Kill wine processes as gitian won't figure out we are done otherwise
-  killall wineserver services.exe explorer.exe winedevice.exe
+  # killall wineserver services.exe explorer.exe winedevice.exe
+  pkill wineserver
+  pkill services.exe
+  pkill explorer.exe
+  pkill winedevice.exe

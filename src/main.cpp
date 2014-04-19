@@ -45,7 +45,8 @@ unsigned int nStakeMinAge = 60 * 60 * 24 * 5;	// minimum age for coin age: 5d
 unsigned int nStakeMaxAge = 60 * 60 * 24 * 40;	// stake age of full weight: 40d
 unsigned int nStakeTargetSpacing = 128;			// 128 sec block spacing
 unsigned int nHStab = 2 * 5 * 100;
-int64 nChainStartTime = 1394386088;
+// int64 nChainStartTime = 1394386088;
+int64 nChainStartTime = 1397736553;
 int nCoinbaseMaturity = 39;
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
@@ -2058,6 +2059,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         return error("AddToBlockIndex() : ComputeNextStakeModifier() failed");
     pindexNew->SetStakeModifier(nStakeModifier, fGeneratedStakeModifier);
     pindexNew->nStakeModifierChecksum = GetStakeModifierChecksum(pindexNew);
+printf("nStakeModifierChecksum:%d\n", pindexNew->nStakeModifierChecksum);
     if (!CheckStakeModifierCheckpoints(pindexNew->nHeight, pindexNew->nStakeModifierChecksum))
         return error("AddToBlockIndex() : Rejected by stake modifier checkpoint height=%d, modifier=0x%016"PRI64x, pindexNew->nHeight, nStakeModifier);
 
@@ -2628,7 +2630,7 @@ bool LoadBlockIndex(bool fAllowNew)
             return false;
 
         // Genesis block
-        const char* pszTimestamp = "March 15, 2014 Chinese space expedition team re-enters low earth orbit with the Probe.";
+        const char* pszTimestamp = "Apr 16, 2014 Mt. Gox seeks liquidation in Tokyo";
         CTransaction txNew;
         txNew.nTime = nChainStartTime;
         txNew.vin.resize(1);
@@ -2641,9 +2643,11 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        block.nTime    = 1391393693;
+        // block.nTime    = 1391393693;
+	block.nTime    = 1397736553;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
-        block.nNonce   = 12565898;
+        // block.nNonce   = 12565898;
+	block.nNonce   = 12565934;
 
 	if(fTestNet)
 		block.nNonce = 12565883;
@@ -2651,6 +2655,7 @@ bool LoadBlockIndex(bool fAllowNew)
         //// debug print
         uint256 hash = block.GetHash();
         while (hash > bnProofOfWorkLimit.getuint256()){
+	    printf("Searching for genesis block...\n");
             if (++block.nNonce==0) break;
             hash = block.GetHash();
         }
@@ -2659,7 +2664,17 @@ bool LoadBlockIndex(bool fAllowNew)
         printf("%s\n", hashGenesisBlock.ToString().c_str());
         printf("%s\n", block.hashMerkleRoot.ToString().c_str());
         block.print();
-        assert(block.hashMerkleRoot == uint256("0xb00ff8e9fa32922157e3de3fa91cbad7f5e198671ead721a1c07c2b4b646dcf9"));
+        assert(block.hashMerkleRoot == uint256("0xa026db1c621c5ac13345ab84a8860ee6f7ff940595e5de57600a636c7d24c065"));
+
+
+        //// debug print
+        printf("block.GetHash() == %s\n", block.GetHash().ToString().c_str());
+        printf("block.hashMerkleRoot == %s\n", block.hashMerkleRoot.ToString().c_str());
+        printf("block.nTime = %u \n", block.nTime);
+        printf("block.nNonce = %u \n", block.nNonce);
+        block.print();
+
+
 	if(!fTestNet)
 	        assert(hash == hashGenesisBlock);
 	else
