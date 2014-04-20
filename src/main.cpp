@@ -47,7 +47,8 @@ unsigned int nStakeTargetSpacing = 128;			// 128 sec block spacing
 unsigned int nHStab = 2 * 5 * 100;
 // int64 nChainStartTime = 1394386088;
 int64 nChainStartTime = 1397736553;
-int nCoinbaseMaturity = 39;
+// int nCoinbaseMaturity = 39;
+int nCoinbaseMaturity = 30;
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 CBigNum bnBestChainTrust = 0;
@@ -942,27 +943,56 @@ static const int CUTOFF_HEIGHT = 100800;	// Height at the end of 5 weeks
 // miner's coin base reward based on nBits
 int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
 {
-	    int nSubsidy = 39 * COIN;
-    if(nHeight > 5000 && nHeight < 86000)
+	    int nSubsidy = 30 * COIN;
+    if(nHeight > 5000 && nHeight < 10000)
     {
-	nSubsidy = 18 * COIN;
+	nSubsidy = 50 * COIN;
     }
-    else if(nHeight >= 86000 && nHeight < 167000)
+    else if(nHeight >= 10000 && nHeight < 20000)
     {
-	nSubsidy = 9 * COIN;
+	nSubsidy = 100 * COIN;
     }
-    else if(nHeight >= 167000 && nHeight < 248000)
+    else if(nHeight >= 20000 && nHeight < 50000)
     {
-	nSubsidy = 4.5 * COIN;
+	nSubsidy = 200 * COIN;
     }
-    else if(nHeight >= 248000 && nHeight < 329000)
+    else if(nHeight >= 50000 && nHeight < 100000)
     {
-	nSubsidy = 2.25 * COIN;
+	nSubsidy = 500 * COIN;
     }
-    else if(nHeight >= 329000 && nHeight < 863340)
+    else if(nHeight >= 100000 && nHeight < 3000000)
     {
-	nSubsidy = 1.125 * COIN;
+	nSubsidy = 1000 * COIN;
     }
+    else if(nHeight >= 3000000 && nHeight < 4000000)
+    {
+	nSubsidy = 500 * COIN;
+    }
+    else if(nHeight >= 4000000 && nHeight < 5000000)
+    {
+	nSubsidy = 200 * COIN;
+    }
+    else if(nHeight >= 5000000 && nHeight < 6000000)
+    {
+	nSubsidy = 100 * COIN;
+    }
+    else if(nHeight >= 6000000 && nHeight < 7000000)
+    {
+	nSubsidy = 50 * COIN;
+    }
+    else if(nHeight >= 7000000 && nHeight < 8000000)
+    {
+	nSubsidy = 10 * COIN;
+    }
+    else if(nHeight >= 8000000 && nHeight < 9000000)
+    {
+	nSubsidy = 5 * COIN;
+    }
+    else if(nHeight >= 9000000)
+    {
+	nSubsidy = 1 * COIN;
+    }
+
 
     if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfWorkReward() : create=%s nHeight=0x%08x nSubsidy=%"PRI64d"\n", FormatMoney(nSubsidy).c_str(), nHeight, nSubsidy);
@@ -2650,7 +2680,7 @@ bool LoadBlockIndex(bool fAllowNew)
 	block.nNonce   = 12565934;
 
 	if(fTestNet)
-		block.nNonce = 12565883;
+		block.nNonce = 12565888;
 
         //// debug print
         uint256 hash = block.GetHash();
