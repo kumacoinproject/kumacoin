@@ -960,35 +960,35 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
     {
 	nSubsidy = 500 * COIN;
     }
-    else if(nHeight >= 100000 && nHeight < 3000000)
+    else if(nHeight >= 100000 && nHeight < 1000000)
     {
 	nSubsidy = 1000 * COIN;
     }
-    else if(nHeight >= 3000000 && nHeight < 4000000)
+    else if(nHeight >= 1000000 && nHeight < 1500000)
     {
 	nSubsidy = 500 * COIN;
     }
-    else if(nHeight >= 4000000 && nHeight < 5000000)
+    else if(nHeight >= 1500000 && nHeight < 2000000)
     {
 	nSubsidy = 200 * COIN;
     }
-    else if(nHeight >= 5000000 && nHeight < 6000000)
+    else if(nHeight >= 2000000 && nHeight < 2500000)
     {
 	nSubsidy = 100 * COIN;
     }
-    else if(nHeight >= 6000000 && nHeight < 7000000)
+    else if(nHeight >= 2500000 && nHeight < 3000000)
     {
 	nSubsidy = 50 * COIN;
     }
-    else if(nHeight >= 7000000 && nHeight < 8000000)
+    else if(nHeight >= 3000000 && nHeight < 3500000)
     {
 	nSubsidy = 10 * COIN;
     }
-    else if(nHeight >= 8000000 && nHeight < 9000000)
+    else if(nHeight >= 3500000 && nHeight < 40000000)
     {
 	nSubsidy = 5 * COIN;
     }
-    else if(nHeight >= 9000000)
+    else if(nHeight >= 4000000)
     {
 	nSubsidy = 1 * COIN;
     }
