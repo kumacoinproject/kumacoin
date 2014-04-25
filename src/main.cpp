@@ -943,64 +943,33 @@ static const int CUTOFF_HEIGHT = 100800;	// Height at the end of 5 weeks
 // miner's coin base reward based on nBits
 int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
 {
-	    int nSubsidy = 10 * COIN;
-    if(nHeight > 5000 && nHeight < 10000)
-    {
-	nSubsidy = 20 * COIN;
-    }
-    else if(nHeight >= 10000 && nHeight < 20000)
-    {
-	nSubsidy = 50 * COIN;
-    }
-    else if(nHeight >= 20000 && nHeight < 30000)
-    {
-	nSubsidy = 100 * COIN;
-    }
-    else if(nHeight >= 30000 && nHeight < 40000)
-    {
-	nSubsidy = 200 * COIN;
-    }
-    else if(nHeight >= 40000 && nHeight < 50000)
-    {
-	nSubsidy = 300 * COIN;
-    }
-    else if(nHeight >= 50000 && nHeight < 100000)
-    {
-	nSubsidy = 500 * COIN;
-    }
-    else if(nHeight >= 100000 && nHeight < 1000000)
-    {
-	nSubsidy = 1000 * COIN;
-    }
-    else if(nHeight >= 1000000 && nHeight < 1500000)
-    {
-	nSubsidy = 500 * COIN;
-    }
-    else if(nHeight >= 1500000 && nHeight < 2000000)
-    {
-	nSubsidy = 200 * COIN;
-    }
-    else if(nHeight >= 2000000 && nHeight < 2500000)
-    {
-	nSubsidy = 100 * COIN;
-    }
-    else if(nHeight >= 2500000 && nHeight < 3000000)
-    {
-	nSubsidy = 50 * COIN;
-    }
-    else if(nHeight >= 3000000 && nHeight < 3500000)
-    {
-	nSubsidy = 10 * COIN;
-    }
-    else if(nHeight >= 3500000 && nHeight < 40000000)
-    {
-	nSubsidy = 5 * COIN;
-    }
-    else if(nHeight >= 4000000)
-    {
-	nSubsidy = 1 * COIN;
-    }
+        int64 nSubsidy = 500 * COIN;
+         
+        std::string cseed_str = prevHash.ToString().substr(7,7);
+        const char* cseed = cseed_str.c_str();
+        long seed = hex2long(cseed);
+        int rand = generateMTRandom(seed, 4999);
+        int rand1 = 0;
+        // int rand2 = 0;
+        // int rand3 = 0;
+        // int rand4 = 0;
+        // int rand5 = 0;
+       
+        if(nHeight < 300000)    
+        {
+                nSubsidy = (1 + rand) * COIN;
+        }
+        else
+	{
+                cseed_str = prevHash.ToString().substr(7,7);
+                cseed = cseed_str.c_str();
+                seed = hex2long(cseed);
+                rand1 = generateMTRandom(seed, 1500);
+                nSubsidy = (500 + rand1) * COIN;
+        }
 
+    // Subsidy is cut in half every 840000 blocks, which will occur approximately every year
+    nSubsidy >>= (nHeight / 1051200); // Kumacoin: 1051200 blocks in ~every year
 
     if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfWorkReward() : create=%s nHeight=0x%08x nSubsidy=%"PRI64d"\n", FormatMoney(nSubsidy).c_str(), nHeight, nSubsidy);
@@ -1083,66 +1052,85 @@ const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfSta
 }
 
 unsigned int static KimotoGravityWell(const CBlockIndex* pindexLast, uint64 TargetBlocksSpacingSeconds, uint64 PastBlocksMin, uint64 PastBlocksMax) {
-	/* kimoto gravity well */
-	const CBlockIndex *BlockLastSolved	= pindexLast;
-	const CBlockIndex *BlockReading	= pindexLast;
-	//const CBlockHeader *BlockCreating = pblock;
-	//BlockCreating = BlockCreating;
-	uint64	PastBlocksMass	= 0;
-	int64	PastRateActualSeconds	= 0;
-	int64	PastRateTargetSeconds	= 0;
-	double	PastRateAdjustmentRatio	= double(1);
-	CBigNum	PastDifficultyAverage;
-	CBigNum	PastDifficultyAveragePrev;
-	double	EventHorizonDeviation;
-	double	EventHorizonDeviationFast;
-	double	EventHorizonDeviationSlow;
+    /* current difficulty formula, megacoin - kimoto gravity well */
+    const CBlockIndex *BlockLastSolved = pindexLast;
+    const CBlockIndex *BlockReading = pindexLast;
+    //const CBlockHeader *BlockCreating = pblock;
+    //BlockCreating = BlockCreating;
+    uint64 PastBlocksMass = 0;
+    int64 PastRateActualSeconds = 0;
+    int64 PastRateTargetSeconds = 0;
+    double PastRateAdjustmentRatio = double(1);
+    CBigNum PastDifficultyAverage;
+    CBigNum PastDifficultyAveragePrev;
+    double EventHorizonDeviation;
+    double EventHorizonDeviationFast;
+    double EventHorizonDeviationSlow;
 
-	if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0 || BlockLastSolved->nHeight <= nHStab || (uint64)BlockLastSolved->nHeight < PastBlocksMin) { return bnProofOfWorkLimit.GetCompact(); }
+    if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0 || (uint64)BlockLastSolved->nHeight < PastBlocksMin) {
+        return bnProofOfWorkLimit.GetCompact();
+    }
+    int64 LatestBlockTime = BlockLastSolved->GetBlockTime();
+    for (unsigned int i = 1; BlockReading && BlockReading->nHeight > 0; i++) {
+        if (PastBlocksMax > 0 && i > PastBlocksMax) {
+            break;
+        }
+        PastBlocksMass++;
 
-	for (unsigned int i = 1; BlockReading && BlockReading->nHeight > 0; i++) {
-	if (PastBlocksMax > 0 && i > PastBlocksMax) { break; }
-	PastBlocksMass++;
+        /* Patched with http://pastebin.com/PY6NHGzu by Sygma (manually) */
+        if (i == 1) {
+            PastDifficultyAverage.SetCompact(BlockReading->nBits);
+        } else {
+            PastDifficultyAverage = ((CBigNum().SetCompact(BlockReading->nBits) - PastDifficultyAveragePrev) / i) + PastDifficultyAveragePrev;
+        }
+        PastDifficultyAveragePrev = PastDifficultyAverage;
 
-	if (i == 1)	{ PastDifficultyAverage.SetCompact(BlockReading->nBits); }
-	else	{ PastDifficultyAverage = ((CBigNum().SetCompact(BlockReading->nBits) - PastDifficultyAveragePrev) / i) + PastDifficultyAveragePrev; }
-	PastDifficultyAveragePrev = PastDifficultyAverage;
-	
-	PastRateActualSeconds	= BlockLastSolved->GetBlockTime() - BlockReading->GetBlockTime();
-	PastRateTargetSeconds	= TargetBlocksSpacingSeconds * PastBlocksMass;
-	PastRateAdjustmentRatio	= double(1);
-	if (PastRateActualSeconds < 0) { PastRateActualSeconds = 0; }
-	if (PastRateActualSeconds != 0 && PastRateTargetSeconds != 0) {
-	PastRateAdjustmentRatio	= double(PastRateTargetSeconds) / double(PastRateActualSeconds);
-	}
-	EventHorizonDeviation	= 1 + (0.7084 * pow((double(PastBlocksMass)/double(144)), -1.228));
-	EventHorizonDeviationFast	= EventHorizonDeviation;
-	EventHorizonDeviationSlow	= 1 / EventHorizonDeviation;
+        if (LatestBlockTime < BlockReading->GetBlockTime()) {
+            LatestBlockTime = BlockReading->GetBlockTime();
+        }
+        PastRateActualSeconds = LatestBlockTime - BlockReading->GetBlockTime();
+        PastRateTargetSeconds = TargetBlocksSpacingSeconds * PastBlocksMass;
+        PastRateAdjustmentRatio = double(1);
+        if (PastRateActualSeconds < 1) {
+            PastRateActualSeconds = 1;
+        }
+ 
+        if (PastRateActualSeconds != 0 && PastRateTargetSeconds != 0) {
+            PastRateAdjustmentRatio = double(PastRateTargetSeconds) / double(PastRateActualSeconds);
+        }
+        EventHorizonDeviation = 1 + (0.7084 * pow((double(PastBlocksMass)/double(144)), -1.228));
+        EventHorizonDeviationFast = EventHorizonDeviation;
+        EventHorizonDeviationSlow = 1 / EventHorizonDeviation;
 
-	if (PastBlocksMass >= PastBlocksMin) {
-	if ((PastRateAdjustmentRatio <= EventHorizonDeviationSlow) || (PastRateAdjustmentRatio >= EventHorizonDeviationFast)) { assert(BlockReading); break; }
-	}
-	if (BlockReading->pprev == NULL) { assert(BlockReading); break; }
-	BlockReading = BlockReading->pprev;
-	}
+        if (PastBlocksMass >= PastBlocksMin) {
+            if ((PastRateAdjustmentRatio <= EventHorizonDeviationSlow) || (PastRateAdjustmentRatio >= EventHorizonDeviationFast)) {
+                assert(BlockReading);
+                break;
+            }
+        }
+        if (BlockReading->pprev == NULL) {
+            assert(BlockReading);
+            break;
+        }
+        BlockReading = BlockReading->pprev;
+    }
 
-	CBigNum bnNew(PastDifficultyAverage);
-	if (PastRateActualSeconds != 0 && PastRateTargetSeconds != 0) {
-	bnNew *= PastRateActualSeconds;
-	bnNew /= PastRateTargetSeconds;
-	}
-	if (bnNew > bnProofOfWorkLimit) { bnNew = bnProofOfWorkLimit; }
+    CBigNum bnNew(PastDifficultyAverage);
+    if (PastRateActualSeconds != 0 && PastRateTargetSeconds != 0) {
+        bnNew *= PastRateActualSeconds;
+        bnNew /= PastRateTargetSeconds;
+    }
+    if (bnNew > bnProofOfWorkLimit) {
+        bnNew = bnProofOfWorkLimit;
+    }
 
-	/// debug print
-	if (fDebug)
-	{
-		printf("Difficulty Retarget - Kimoto Gravity Well\n");
-		printf("BlockLastSolved height: %d pindexLast height: %d\n", BlockLastSolved->nHeight, pindexLast->nHeight);
-		printf("PastRateAdjustmentRatio = %g\n", PastRateAdjustmentRatio);
-		printf("Before: %08x %s\n", BlockLastSolved->nBits, CBigNum().SetCompact(BlockLastSolved->nBits).getuint256().ToString().c_str());
-		printf("After: %08x %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
-	}
-	return bnNew.GetCompact();
+    /// debug print
+    printf("Difficulty Retarget - Kimoto Gravity Well\n");
+    printf("PastRateAdjustmentRatio = %g\n", PastRateAdjustmentRatio);
+    printf("Before: %08x %s\n", BlockLastSolved->nBits, CBigNum().SetCompact(BlockLastSolved->nBits).getuint256().ToString().c_str());
+    printf("After: %08x %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
+
+    return bnNew.GetCompact();
 }
 
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake) 
@@ -1158,7 +1146,8 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
         
     int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
 
-    if(pindexLast->nHeight < 8600)
+//    if(pindexLast->nHeight < 8600)
+    if(false)
     {
 	    CBigNum bnNew;
 	    bnNew.SetCompact(pindexPrev->nBits);
