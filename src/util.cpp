@@ -1055,13 +1055,13 @@ void PrintExceptionContinue(std::exception* pex, const char* pszThread)
 boost::filesystem::path GetDefaultDataDir()
 {
     namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\kumacoin
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\kumacoin
-    // Mac: ~/Library/Application Support/kumacoin
-    // Unix: ~/.kumacoin
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\Kumacoin
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\Kumacoin
+    // Mac: ~/Library/Application Support/Kumacoin
+    // Unix: ~/.Kumacoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "kumacoin";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "Kumacoin";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -1073,10 +1073,10 @@ boost::filesystem::path GetDefaultDataDir()
     // Mac
     pathRet /= "Library/Application Support";
     fs::create_directory(pathRet);
-    return pathRet / "kumacoin";
+    return pathRet / "Kumacoin";
 #else
     // Unix
-    return pathRet / ".kumacoin";
+    return pathRet / ".Kumacoin";
 #endif
 #endif
 }
