@@ -94,7 +94,7 @@
         <cursorShape>IBeamCursor</cursorShape>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copyright © 2009-2012 Bitcoin Developers&lt;/p&gt;&lt;p&gt;Copyright © 2012 PPCoin Developers&lt;/p&gt;&lt;p&gt;Copyright © 2014 KumaCoin Developers&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copyright © 2009-2012 Bitcoin Developers&lt;/p&gt;&lt;p&gt;Copyright © 2012 PPCoin Developers&lt;/p&gt;&lt;p&gt;Copyright © 2014 PROBE Developers&lt;/p&gt;&lt;p&gt;Copyright © 2014 KumaCoin Developers&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="textInteractionFlags">
         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>

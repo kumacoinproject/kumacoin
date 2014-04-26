@@ -968,7 +968,7 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
                 nSubsidy = (500 + rand1) * COIN;
         }
 
-    // Subsidy is cut in half every 840000 blocks, which will occur approximately every year
+    // Subsidy is cut in half every 1051200 blocks, which will occur approximately every year
     nSubsidy >>= (nHeight / 1051200); // Kumacoin: 1051200 blocks in ~every year
 
     if (fDebug && GetBoolArg("-printcreation"))
