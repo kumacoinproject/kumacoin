@@ -1055,13 +1055,13 @@ void PrintExceptionContinue(std::exception* pex, const char* pszThread)
 boost::filesystem::path GetDefaultDataDir()
 {
     namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\KumaCoin
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\KumaCoin
-    // Mac: ~/Library/Application Support/KumaCoin
-    // Unix: ~/.KumaCoin
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\kumacoin
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\kumacoin
+    // Mac: ~/Library/Application Support/kumacoin
+    // Unix: ~/.kumacoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "KumaCoin";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "kumacoin";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -1073,10 +1073,10 @@ boost::filesystem::path GetDefaultDataDir()
     // Mac
     pathRet /= "Library/Application Support";
     fs::create_directory(pathRet);
-    return pathRet / "KumaCoin";
+    return pathRet / "kumacoin";
 #else
     // Unix
-    return pathRet / ".KumaCoin";
+    return pathRet / ".kumacoin";
 #endif
 #endif
 }
@@ -1118,7 +1118,7 @@ const boost::filesystem::path &GetDataDir(bool fNetSpecific)
 
 boost::filesystem::path GetConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-conf", "KumaCoin.conf"));
+    boost::filesystem::path pathConfigFile(GetArg("-conf", "kumacoin.conf"));
     if (!pathConfigFile.is_complete()) pathConfigFile = GetDataDir(false) / pathConfigFile;
     return pathConfigFile;
 }

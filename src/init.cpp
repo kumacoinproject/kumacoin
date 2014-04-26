@@ -219,7 +219,7 @@ std::string HelpMessage()
 {
     string strUsage = _("Options:") + "\n" +
         "  -?                     " + _("This help message") + "\n" +
-        "  -conf=<file>           " + _("Specify configuration file (default: KumaCoin.conf)") + "\n" +
+        "  -conf=<file>           " + _("Specify configuration file (default: kumacoin.conf)") + "\n" +
         "  -pid=<file>            " + _("Specify pid file (default: KumaCoind.pid)") + "\n" +
         "  -gen                   " + _("Generate coins") + "\n" +
         "  -gen=0                 " + _("Don't generate coins") + "\n" +
