@@ -46,7 +46,7 @@ unsigned int nStakeMaxAge = 60 * 60 * 24 * 40;	// stake age of full weight: 40d
 unsigned int nStakeTargetSpacing = 128;			// 128 sec block spacing
 unsigned int nHStab = 2 * 5 * 100;
 // int64 nChainStartTime = 1394386088;
-int64 nChainStartTime = 1397736553;
+int64 nChainStartTime = 1398678972;
 // int nCoinbaseMaturity = 39;
 int nCoinbaseMaturity = 50;
 CBlockIndex* pindexGenesisBlock = NULL;
@@ -955,7 +955,7 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
         // int rand4 = 0;
         // int rand5 = 0;
        
-        if(nHeight < 300000)    
+        if(nHeight < 100000)    
         {
                 nSubsidy = (1 + rand) * COIN;
         }
@@ -964,8 +964,8 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
                 cseed_str = prevHash.ToString().substr(7,7);
                 cseed = cseed_str.c_str();
                 seed = hex2long(cseed);
-                rand1 = generateMTRandom(seed, 1500);
-                nSubsidy = (500 + rand1) * COIN;
+                rand1 = generateMTRandom(seed, 1999);
+                nSubsidy = (1 + rand1) * COIN;
         }
 
     // Subsidy is cut in half every 1051200 blocks, which will occur approximately every year
@@ -2657,7 +2657,7 @@ bool LoadBlockIndex(bool fAllowNew)
             return false;
 
         // Genesis block
-        const char* pszTimestamp = "Apr 16, 2014 Mt. Gox seeks liquidation in Tokyo";
+        const char* pszTimestamp = "Apr 28, 2014 Egypt Sentences 683 To Death In Mass Trial";
         CTransaction txNew;
         txNew.nTime = nChainStartTime;
         txNew.vin.resize(1);
@@ -2671,13 +2671,13 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
         // block.nTime    = 1391393693;
-	block.nTime    = 1397736553;
+	block.nTime    = 1398678972;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
         // block.nNonce   = 12565898;
-	block.nNonce   = 12565934;
+	block.nNonce   = 12565946;
 
 	if(fTestNet)
-		block.nNonce = 12565888;
+		block.nNonce = 12565892;
 
         //// debug print
         uint256 hash = block.GetHash();
@@ -2691,7 +2691,7 @@ bool LoadBlockIndex(bool fAllowNew)
         printf("%s\n", hashGenesisBlock.ToString().c_str());
         printf("%s\n", block.hashMerkleRoot.ToString().c_str());
         block.print();
-        assert(block.hashMerkleRoot == uint256("0xa026db1c621c5ac13345ab84a8860ee6f7ff940595e5de57600a636c7d24c065"));
+        assert(block.hashMerkleRoot == uint256("0xb1208279789337a0bb7673a50a5fdbdb436c5f0115e1b20846895759b20945b8"));
 
 
         //// debug print
