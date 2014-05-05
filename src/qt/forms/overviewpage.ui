@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>573</width>
-    <height>342</height>
+    <height>448</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -231,6 +231,20 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QFrame" name="frame_3">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>256</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-image: url(:/icons/KumaCoin256);background-repeat:none;background-position:bottom center;
+</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -323,6 +337,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../bitcoin.qrc"/>
+ </resources>
  <connections/>
 </ui>

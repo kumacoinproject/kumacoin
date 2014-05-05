@@ -42,8 +42,8 @@
         <file alias="debugwindow">res/icons/debugwindow.png</file>
         <file alias="bottombars">res/icons/bottombars.png</file>
         <file alias="subtlecarbon">res/icons/subtle_carbon.png</file>
-        <file alias="kumacoin256">res/icons/kumacoin-coinlogo-copper2-256.png</file>
-        <file alias="kumacointext">res/icons/kumacoin-text-logo.png</file>
+        <file alias="KumaCoin256">res/icons/KumaCoin-coinlogo-copper2-256.png</file>
+        <file alias="KumaCointext">res/icons/KumaCoin-text-logo.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>

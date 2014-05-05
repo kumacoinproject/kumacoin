@@ -470,7 +470,7 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location line="+0"/>
         <source>Wallet</source>
-        <translation>Wallet</translation>
+        <translation>ウォレット</translation>
     </message>
     <message>
         <location line="+168"/>
@@ -980,7 +980,7 @@ Address: %4
     <message>
         <location filename="../forms/overviewpage.ui" line="+14"/>
         <source>Form</source>
-        <translation>Form</translation>
+        <translation>フォーム</translation>
     </message>
     <message>
         <location line="+33"/>
@@ -991,47 +991,47 @@ Address: %4
     <message>
         <location line="-141"/>
         <source>Balance:</source>
-        <translation>Balance:</translation>
+        <translation>残高:</translation>
     </message>
     <message>
         <location line="+118"/>
         <source>Stake:</source>
-        <translation>Stake:</translation>
+        <translation>ステーク:</translation>
     </message>
     <message>
         <location line="+58"/>
         <source>Number of transactions:</source>
-        <translation>Number of transactions:</translation>
+        <translation>トランザクション数:</translation>
     </message>
     <message>
         <location line="-29"/>
         <source>Unconfirmed:</source>
-        <translation>Unconfirmed:</translation>
+        <translation>未確認:</translation>
     </message>
     <message>
         <location line="-78"/>
         <source>Wallet</source>
-        <translation>Wallet</translation>
+        <translation>ウォレット</translation>
     </message>
     <message>
         <location line="+124"/>
         <source>Immature:</source>
-        <translation>Immature:</translation>
+        <translation>未熟:</translation>
     </message>
     <message>
         <location line="+13"/>
         <source>Mined balance that has not yet matured</source>
-        <translation>Mined balance that has not yet matured</translation>
+        <translation>発掘されたが、まだ成熟していない量</translation>
     </message>
     <message>
         <location line="+46"/>
         <source>&lt;b&gt;Recent transactions&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Recent transactions&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;最近の取引&lt;/b&gt;</translation>
     </message>
     <message>
         <location line="-118"/>
         <source>Your current balance</source>
-        <translation>Your current balance</translation>
+        <translation>今の残高</translation>
     </message>
     <message>
         <location line="+29"/>
@@ -1052,7 +1052,7 @@ Address: %4
         <location filename="../overviewpage.cpp" line="+112"/>
         <location line="+1"/>
         <source>out of sync</source>
-        <translation>out of sync</translation>
+        <translation>非同期</translation>
     </message>
 </context>
 <context>
@@ -1060,7 +1060,7 @@ Address: %4
     <message>
         <location filename="../forms/qrcodedialog.ui" line="+14"/>
         <source>QR Code Dialog</source>
-        <translation>QR Code Dialog</translation>
+        <translation>QRコードダイアログ</translation>
     </message>
     <message>
         <location line="+59"/>
@@ -1105,7 +1105,7 @@ Address: %4
     <message>
         <location line="+25"/>
         <source>Save QR Code</source>
-        <translation>Save QR Code</translation>
+        <translation>QRコードの保存</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -1282,7 +1282,7 @@ Address: %4
     <message>
         <location line="+3"/>
         <source>Add &amp;Recipient</source>
-        <translation type="unfinished"></translation>
+        <translation>支払先の追加(&amp;R)</translation>
     </message>
     <message>
         <location line="+20"/>
@@ -1292,12 +1292,12 @@ Address: %4
     <message>
         <location line="+3"/>
         <source>Clear &amp;All</source>
-        <translation>Clear &amp;All</translation>
+        <translation>すべてクリア(&amp;A)</translation>
     </message>
     <message>
         <location line="+22"/>
         <source>Balance:</source>
-        <translation>Balance:</translation>
+        <translation>残高:</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -1375,17 +1375,17 @@ Address: %4
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="+14"/>
         <source>Form</source>
-        <translation>Form</translation>
+        <translation>フォーム</translation>
     </message>
     <message>
         <location line="+15"/>
         <source>A&amp;mount:</source>
-        <translation>A&amp;mount:</translation>
+        <translation>額(&amp;M):</translation>
     </message>
     <message>
         <location line="+13"/>
         <source>Pay &amp;To:</source>
-        <translation>Pay &amp;To:</translation>
+        <translation>支払先(&amp;T):</translation>
     </message>
     <message>
         <location line="+24"/>
@@ -1396,7 +1396,7 @@ Address: %4
     <message>
         <location line="+9"/>
         <source>&amp;Label:</source>
-        <translation>&amp;Label:</translation>
+        <translation>ラベル(&amp;L):</translation>
     </message>
     <message>
         <location line="+18"/>
@@ -1660,7 +1660,7 @@ Address: %4
     <message>
         <location line="+4"/>
         <source>Date</source>
-        <translation>Date</translation>
+        <translation>日時</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -1820,22 +1820,22 @@ Address: %4
     <message>
         <location filename="../transactiontablemodel.cpp" line="+226"/>
         <source>Date</source>
-        <translation>Date</translation>
+        <translation>日付</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>Type</source>
-        <translation>Type</translation>
+        <translation>タイプ</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>Address</source>
-        <translation>Address</translation>
+        <translation>アドレス</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>Amount</source>
-        <translation>Amount</translation>
+        <translation>額</translation>
     </message>
     <message numerus="yes">
         <location line="+57"/>
@@ -1886,7 +1886,7 @@ Address: %4
     <message>
         <location line="+43"/>
         <source>Received with</source>
-        <translation>Received with</translation>
+        <translation>入金</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -1896,7 +1896,7 @@ Address: %4
     <message>
         <location line="+3"/>
         <source>Sent to</source>
-        <translation>Sent to</translation>
+        <translation>送金</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -1906,12 +1906,12 @@ Address: %4
     <message>
         <location line="+2"/>
         <source>Mined</source>
-        <translation>Mined</translation>
+        <translation>発掘</translation>
     </message>
     <message>
         <location line="+38"/>
         <source>(n/a)</source>
-        <translation>(n/a)</translation>
+        <translation>自分への送金</translation>
     </message>
     <message>
         <location line="+199"/>
@@ -2065,7 +2065,7 @@ Address: %4
     <message>
         <location line="+1"/>
         <source>Label</source>
-        <translation>Label</translation>
+        <translation>レーベル</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2085,12 +2085,12 @@ Address: %4
     <message>
         <location line="+4"/>
         <source>Error exporting</source>
-        <translation>Error exporting</translation>
+        <translation>エラー出力</translation>
     </message>
     <message>
         <location line="+0"/>
         <source>Could not write to file %1.</source>
-        <translation>Could not write to file %1.</translation>
+        <translation>%1のファイルに書き込めませんでした。</translation>
     </message>
     <message>
         <location line="+95"/>
@@ -2108,7 +2108,7 @@ Address: %4
     <message>
         <location filename="../walletmodel.cpp" line="+192"/>
         <source>Sending...</source>
-        <translation>Sending...</translation>
+        <translation>コインを送る</translation>
     </message>
 </context>
 <context>
