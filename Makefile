@@ -12,11 +12,19 @@ CC            = gcc
 CXX           = g++
 DEFINES       = -DQT_WEBKIT -DQT_GUI -DBOOST_THREAD_USE_LIB -DBOOST_SPIRIT_THREADSAFE -DBOOST_THREAD_PROVIDES_GENERIC_SHARED_MUTEX_ON_WIN -D__NO_SYSTEM_INCLUDES -DUSE_IPV6=1 -DHAVE_BUILD_INFO -DLINUX -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED
 CFLAGS        = -m64 -pipe -msse2 -O2 -Wall -W -D_REENTRANT $(DEFINES)
-CXXFLAGS      = -m64 -pipe -fstack-protector-all --param ssp-buffer-size=1 -msse2 -O2 -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector -D_REENTRANT $(DEFINES)
-INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++-64 -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtGui -I/usr/include/qt4 -Isrc -Isrc/json -Isrc/qt -Ibuild -Ibuild
-LINK          = g++
-LFLAGS        = -m64 -fstack-protector-all --param ssp-buffer-size=1 -Wl,-O1
-LIBS          = $(SUBLIBS)  -L/usr/lib/x86_64-linux-gnu -lrt -lssl -lcrypto -ldb_cxx -lboost_system -lboost_filesystem -lboost_program_options -lboost_thread -lQtGui -lQtCore -lpthread 
+
+# CXXFLAGS      = -m64 -pipe -fstack-protector-all --param ssp-buffer-size=1 -msse2 -O2 -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector -D_REENTRANT $(DEFINES)
+# INCPATH       = -I/usr/share/qt4/mkspecs/linux-g++-64 -I/usr/include/qt4/QtCore -I/usr/include/qt4/QtGui -I/usr/include/qt4 -Isrc -Isrc/json -Isrc/qt -Ibuild -Ibuild
+# LINK          = g++
+# LFLAGS        = -m64 -fstack-protector-all --param ssp-buffer-size=1 -Wl,-O1
+# LIBS          = $(SUBLIBS)  -L/usr/lib/x86_64-linux-gnu -lrt -lssl -lcrypto -ldb_cxx -lboost_system -lboost_filesystem -lboost_program_options -lboost_thread -lQtGui -lQtCore -lpthread 
+
+CXXFLAGS      = -pipe -mmacosx-version-min=10.7 -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -fstack-protector-all -D_FORTIFY_SOURCE=2 -O2 -arch x86_64 -pthread -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector $(DEFINES)
+INCPATH       = -I/usr/local/Cellar/qt/4.8.5/mkspecs/unsupported/macx-clang -I/usr/local/Cellar/qt/4.8.5/lib/QtCore.framework/Versions/4/Headers -I/usr/local/Cellar/qt/4.8.5/lib/QtCore.framework/Versions/4/Headers -I/usr/local/Cellar/qt/4.8.5/lib/QtNetwork.framework/Versions/4/Headers -I/usr/local/Cellar/qt/4.8.5/lib/QtNetwork.framework/Versions/4/Headers -I/usr/local/Cellar/qt/4.8.5/lib/QtGui.framework/Versions/4/Headers -I/usr/local/Cellar/qt/4.8.5/lib/QtGui.framework/Versions/4/Headers -I/usr/local/Cellar/qt/4.8.5/include -Isrc -Isrc/json -Isrc/qt -Isrc/leveldb/include -Isrc/leveldb/helpers -I/opt/local/include -I/opt/local/include/db48 -Ibuild -Ibuild -F/usr/local/Cellar/qt/4.8.5/lib -I/usr/local/Cellar/boost/1.54.0/include -I/usr/local/Cellar/berkeley-db4/4.8.30/include -I/usr/local/Cellar/miniupnpc/1.8.20131007/include -I/usr/local/Cellar/qrencode/3.4.3/include
+LINK          = clang++
+LFLAGS        = -headerpad_max_install_names -mmacosx-version-min=10.7 -arch x86_64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -fstack-protector-all -arch x86_64 -pthread
+LIBS          = $(SUBLIBS) -F/usr/local/Cellar/qt/4.8.5/lib -L/usr/local/Cellar/qt/4.8.5/lib -lqrencode -lminiupnpc /Users/shaiw/QubitCoin/src/leveldb/libleveldb.a /Users/shaiw/QubitCoin/src/leveldb/libmemenv.a -framework Foundation -framework ApplicationServices -framework AppKit -L/opt/local/lib -L/opt/local/lib/db48 -lssl -lcrypto -ldb_cxx-4.8 -lboost_system-mt -lboost_filesystem-mt -lboost_program_options-mt -lboost_thread-mt -lboost_chrono-mt -framework QtGui -L/usr/X11/lib -L/usr/local/Cellar/qt/4.8.5/lib -F/usr/local/Cellar/qt/4.8.5/lib -framework QtCore -framework QtNetwork -L/usr/local/Cellar/boost/1.54.0/lib -L/usr/local/Cellar/berkeley-db4/4.8.30/lib -L/usr/local/Cellar/miniupnpc/1.8.20131007/lib -L/usr/local/Cellar/qrencode/3.4.3/lib
+
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/bin/qmake
