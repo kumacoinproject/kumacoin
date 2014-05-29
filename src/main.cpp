@@ -77,7 +77,7 @@ int64 nHPSTimerStart;
 
 // Settings
 int64 nTransactionFee = MIN_TX_FEE;
-
+int64_t nReserveBalance = 0;
 
 //////////////////////////////////////////////////////////////////////////////
 //
