@@ -1140,9 +1140,123 @@ unsigned int nTargetTimespanRe = 1 * 90; // 1.5 minutes
 unsigned int nTargetSpacingRe = 1 * 90; // 1.5 minutes
 unsigned int nIntervalRe = nTargetTimespanRe / nTargetSpacingRe; // 1 block
 
+unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
+{
+    CBigNum bnTargetLimit = fProofOfStake ? bnProofOfStakeLimit : bnProofOfWorkLimit;
+
+    int nHeight = pindexLast->nHeight + 1;
+    bool fNewDifficultyProtocol = (nHeight >= 0);
+    int blockstogoback = 0;
+
+    //set default to pre-v2.0 values
+    int retargetTimespan = nTargetTimespanDS;
+    int retargetSpacing = nTargetSpacing;
+    int retargetInterval = nInterval;
+
+    // Genesis block
+    if (pindexLast == NULL)
+        return bnTargetLimit.GetCompact(); // genesis block
+
+    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
+    if (pindexPrev->pprev == NULL)
+        return bnTargetLimit.GetCompact(); // first block
+
+    // Ringo: This fixes an issue where a 51% attack can change difficulty at will.
+    // Go back the full period unless it's the first retarget after genesis. Code courtesy of Art Forz
+    blockstogoback = retargetInterval-1;
+    if ((pindexPrev->nHeight+1) != retargetInterval) blockstogoback = retargetInterval;
+
+    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+    // Go back by what we want to be 14 days worth of blocks
+    for (int i = 0; pindexPrevPrev && i < blockstogoback; i++)
+/*
+    pindexPrevPrev = pindexPrevPrev->pprev;
+*/
+    assert(pindexPrevPrev);
+    if (pindexPrevPrev->pprev == NULL)
+        return bnTargetLimit.GetCompact(); // second block
+
+    //if v2.0 changes are in effect for block num, alter retarget values 
+   if(fNewDifficultyProtocol) {
+      retargetTimespan = nTargetTimespanRe;
+      retargetSpacing = nTargetSpacingRe;
+      retargetInterval = nIntervalRe;
+    }
+    
+    // Only change once per interval
+    if ((pindexPrev->nHeight+1) % retargetInterval != 0){
+    // Ringo: remove
+/*
+      // Special difficulty rule for testnet:
+		if (fTestNet){
+		// If the new block's timestamp is more than 2* 10 minutes
+		// then allow mining of a min-difficulty block.
+		if (pblock->nTime > pindexLast->nTime + retargetSpacing*2)
+			return bnTargetLimit.GetCompact();
+	else {
+*/
+             {
+		// Return the last non-special-min-difficulty-rules-block
+		const CBlockIndex* pindex = pindexPrev;
+		while (pindex->pprev && pindex->nHeight % retargetInterval != 0 && pindex->nBits == bnTargetLimit.GetCompact()) 
+			pindex = pindex->pprev;
+	return pindex->nBits;
+        }
+/*
+	}
+
+      } 
+*/
+      return pindexPrev->nBits;
+    }
+
+
+    // Limit adjustment step
+    int64_t nActualTimespan = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+    printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
+
+
+
+    CBigNum bnNew;
+    bnNew.SetCompact(pindexPrev->nBits);
+    
+	// DigiByte: thanks to RealSolid & WDC for this code
+		if(fNewDifficultyProtocol) {
+		  
+			if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
+			if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
+		}
+		else {
+			if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
+			if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
+		}
+
+    // Retarget
+    bnNew *= nActualTimespan;
+    bnNew /= retargetTimespan;
+
+/*
+    /// debug print
+    printf("GetNextWorkRequired RETARGET \n");
+    printf("retargetTimespan = %"PRId64"    nActualTimespan = %"PRId64"\n", retargetTimespan, nActualTimespan);
+    printf("Before: %08x  %s\n", pindexLast->nBits, CBigNum().SetCompact(pindexLast->nBits).getuint256().ToString().c_str());
+    printf("After:  %08x  %s\n", bnNew.GetCompact(), bnNew.getuint256().ToString().c_str());
+*/
+
+    if (bnNew > bnTargetLimit)
+        bnNew = bnTargetLimit;
+
+
+
+    return bnNew.GetCompact();
+}
+
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake) 
 {
     int nHeight = pindexLast->nHeight + 1;
+
+    if(nHeight > 19007)
+       return DigiShield(pindexLast, fProofOfStake);
 
     if(nHeight > 4491)
     {
