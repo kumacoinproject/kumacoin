@@ -1167,19 +1167,14 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
     if ((pindexPrev->nHeight+1) != retargetInterval) blockstogoback = retargetInterval;
 
     const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+/*
     // Go back by what we want to be 14 days worth of blocks
     for (int i = 0; pindexPrevPrev && i < blockstogoback; i++)
-/*
     pindexPrevPrev = pindexPrevPrev->pprev;
-*/
     assert(pindexPrevPrev);
+*/
     if (pindexPrevPrev->pprev == NULL)
         return bnTargetLimit.GetCompact(); // second block
-
-//iran
-    if(nHeight == 27196 && fProofOfStake || nHeight == 27196)
-        return bnTargetLimit.GetCompact(); 
-//iran
 
     //if v2.0 changes are in effect for block num, alter retarget values 
    if(fNewDifficultyProtocol) {
@@ -1260,7 +1255,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 {
     int nHeight = pindexLast->nHeight + 1;
 
-    if(nHeight > 27195)
+    if(nHeight > 90000)
        return DigiShield(pindexLast, fProofOfStake);
 
     if(nHeight > 4491)
