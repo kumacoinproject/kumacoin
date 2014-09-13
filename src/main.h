@@ -87,8 +87,12 @@ extern unsigned char pchMessageStart[4];
 extern std::map<uint256, CBlock*> mapOrphanBlocks;
 
 // Settings
-extern int64 nTransactionFee;
+extern int64_t nTransactionFee;
 extern int64_t nReserveBalance;
+extern int64_t nMinimumInputValue;
+
+extern bool fEnforceCanonical;
+
 // Minimum disk space required - used in CheckDiskSpace()
 static const uint64 nMinDiskSpace = 52428800;
 

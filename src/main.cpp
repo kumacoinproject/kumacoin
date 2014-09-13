@@ -76,8 +76,9 @@ double dHashesPerSec;
 int64 nHPSTimerStart;
 
 // Settings
-int64 nTransactionFee = MIN_TX_FEE;
+int64_t nTransactionFee = MIN_TX_FEE;
 int64_t nReserveBalance = 0;
+int64_t nMinimumInputValue = 0;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -304,12 +305,18 @@ bool CTransaction::IsStandard() const
             return false;
         if (!txin.scriptSig.IsPushOnly())
             return false;
+        if (fEnforceCanonical && !txin.scriptSig.HasCanonicalPushes()) {
+            return false;
+        }
     }
     BOOST_FOREACH(const CTxOut& txout, vout) {
         if (!::IsStandard(txout.scriptPubKey))
             return false;
         if (txout.nValue == 0)
             return false;
+        if (fEnforceCanonical && !txout.scriptPubKey.HasCanonicalPushes()) {
+            return false;
+        }
     }
     return true;
 }
@@ -4291,7 +4298,7 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
     // a transaction spammer can cheaply fill blocks using
     // 1-satoshi-fee transactions. It should be set above the real
     // cost to you of processing a transaction.
-    int64 nMinTxFee = MIN_TX_FEE;
+    int64_t nMinTxFee = MIN_TX_FEE;
     if (mapArgs.count("-mintxfee"))
         ParseMoney(mapArgs["-mintxfee"], nMinTxFee);
 

@@ -59,6 +59,7 @@ private:
 
 signals:
     void displayUnitChanged(int unit);
+    void transactionFeeChanged(qint64);
 };
 
 #endif // OPTIONSMODEL_H

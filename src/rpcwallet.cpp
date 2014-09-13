@@ -1650,7 +1650,7 @@ Value reservebalance(const Array& params, bool fHelp)
     }
 
     Object result;
-    int64 nReserveBalance = 0;
+    int64_t nReserveBalance = 0;
     if (mapArgs.count("-reservebalance") && !ParseMoney(mapArgs["-reservebalance"], nReserveBalance))
         throw runtime_error("invalid reserve balance amount\n");
     result.push_back(Pair("reserve", (nReserveBalance > 0)));
