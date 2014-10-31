@@ -1236,20 +1236,13 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
     return bnNew.GetCompact();
 }
 
-unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake) 
+unsigned int NextTarget4491(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
-    int nHeight = pindexLast->nHeight + 1;
-
-    if(nHeight > 90000)
-       return DigiShield(pindexLast, fProofOfStake);
-
-    if(nHeight > 4491)
-    {
     CBigNum bnTargetLimit = fProofOfStake ? bnProofOfStakeLimit : bnProofOfWorkLimit;
 
     bool fNewDifficultyProtocol = (nHeight >= 0);
     int blockstogoback = 0;
-	
+
     //set default to pre-v2.0 values
     int retargetTimespan = nTargetTimespanDS;
     int retargetSpacing = nTargetSpacing;
@@ -1259,10 +1252,10 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
         return bnProofOfWorkLimit.GetCompact(); // genesis block
 
     //if v2.0 changes are in effect for block num, alter retarget values 
-   if(fNewDifficultyProtocol) {
-      retargetTimespan = nTargetTimespanRe;
-      retargetSpacing = nTargetSpacingRe;
-      retargetInterval = nIntervalRe;
+    if(fNewDifficultyProtocol) {
+        retargetTimespan = nTargetTimespanRe;
+        retargetSpacing = nTargetSpacingRe;
+        retargetInterval = nIntervalRe;
     }
     
     // Only change once per interval
@@ -1284,7 +1277,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 	}
       }  
 */
-      return pindexLast->nBits;
+        return pindexLast->nBits;
     }
     
     // Kumacoin: This fixes an issue where a 51% attack can change difficulty at will.
@@ -1302,21 +1295,17 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     int64 nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
     if(fDebug) printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
 
-
-
     CBigNum bnNew;
     bnNew.SetCompact(pindexLast->nBits);
     
-	// DigiByte: thanks to RealSolid & WDC for this code
-		if(fNewDifficultyProtocol) {
-		  
-			if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
-			if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
-		}
-		else {
-			if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
-			if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
-		}
+    // DigiByte: thanks to RealSolid & WDC for this code
+    if(fNewDifficultyProtocol) {
+        if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
+        if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
+    } else {
+        if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
+        if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
+    }
 
     // Retarget
     bnNew *= nActualTimespan;
@@ -1333,11 +1322,10 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     if (bnNew > bnTargetLimit)
         bnNew = bnTargetLimit;
 
-
-
     return bnNew.GetCompact();
-    }
-
+}
+unsigned int NextTarget0(const CBlockIndex* pindexLast, bool fProofOfStake)
+{
     if (pindexLast == NULL)
         return bnProofOfWorkLimit.GetCompact(); // genesis block
     const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
@@ -1352,53 +1340,60 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 //    if(pindexLast->nHeight < 8600)
     if(false)
     {
-	    CBigNum bnNew;
-	    bnNew.SetCompact(pindexPrev->nBits);
-	    if(!fProofOfStake)
-	    {
-		static const int64	BlocksTargetSpacing	= 128; // 128 seconds
-		unsigned int	TimeDaySeconds	= 60 * 60 * 24;
-		int64	PastSecondsMin	= TimeDaySeconds * 0.125;
-		int64	PastSecondsMax	= TimeDaySeconds * 7;
-		uint64	PastBlocksMin	= PastSecondsMin / BlocksTargetSpacing;
-		uint64	PastBlocksMax	= PastSecondsMax / BlocksTargetSpacing;	//7 days of blocks
+        CBigNum bnNew;
+        bnNew.SetCompact(pindexPrev->nBits);
+        if(!fProofOfStake)
+        {
+            static const int64	BlocksTargetSpacing	= 128; // 128 seconds
+            unsigned int	TimeDaySeconds	= 60 * 60 * 24;
+            int64	PastSecondsMin	= TimeDaySeconds * 0.125;
+            int64	PastSecondsMax	= TimeDaySeconds * 7;
+            uint64	PastBlocksMin	= PastSecondsMin / BlocksTargetSpacing;
+            uint64	PastBlocksMax	= PastSecondsMax / BlocksTargetSpacing;	//7 days of blocks
 
-		  return KimotoGravityWell(pindexLast, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax);
-	    }
-	    else
-	    {
-		    if (fDebug)
-			printf("Retarget for Proof of Stake");
+            return KimotoGravityWell(pindexLast, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax);
+        } else {
+            if (fDebug)
+                printf("Retarget for Proof of Stake");
 
-		    // KumaCoin: target change every block
-		    // KumaCoin: retarget with exponential moving toward target spacing
-	    	int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
-		int64 nInterval = nTargetTimespan / nTargetSpacing;
-		bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-		bnNew /= ((nInterval + 1) * nTargetSpacing);
-	    }
+            // KumaCoin: target change every block
+            // KumaCoin: retarget with exponential moving toward target spacing
+            int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
+            int64 nInterval = nTargetTimespan / nTargetSpacing;
+            bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+            bnNew /= ((nInterval + 1) * nTargetSpacing);
+        }
 
-	    if (bnNew > bnProofOfWorkLimit)
-		bnNew = bnProofOfWorkLimit;
+        if (bnNew > bnProofOfWorkLimit)
+            bnNew = bnProofOfWorkLimit;
 
-	    return bnNew.GetCompact();
+        return bnNew.GetCompact();
+    } else {
+        // KumaCoin: target change every block
+        // KumaCoin: retarget with exponential moving toward target spacing
+        CBigNum bnNew;
+        bnNew.SetCompact(pindexPrev->nBits);
+        int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
+        int64 nInterval = nTargetTimespan / nTargetSpacing;
+        bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+        bnNew /= ((nInterval + 1) * nTargetSpacing);
+
+        if (bnNew > bnProofOfWorkLimit)
+            bnNew = bnProofOfWorkLimit;
+
+        return bnNew.GetCompact();
     }
+}
+
+unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake) 
+{
+    int nHeight = pindexLast->nHeight + 1;
+    if(nHeight > 90000)
+        return DigiShield(pindexLast, fProofOfStake);
+    else if(nHeight > 4491)
+        return NextTarget4491(pindexLast, fProofOfStake);
     else
-    {
-		// KumaCoin: target change every block
-		// KumaCoin: retarget with exponential moving toward target spacing
-		CBigNum bnNew;
-		bnNew.SetCompact(pindexPrev->nBits);
-	    	int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
-		int64 nInterval = nTargetTimespan / nTargetSpacing;
-		bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-		bnNew /= ((nInterval + 1) * nTargetSpacing);
-
-		if (bnNew > bnProofOfWorkLimit)
-		bnNew = bnProofOfWorkLimit;
-
-		return bnNew.GetCompact();
-    }
+        return NextTarget0(pindexLast, fProofOfStake);
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)
