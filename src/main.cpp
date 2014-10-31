@@ -1238,6 +1238,7 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
 
 unsigned int NextTarget4491(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
+    int nHeight = pindexLast->nHeight + 1;
     CBigNum bnTargetLimit = fProofOfStake ? bnProofOfStakeLimit : bnProofOfWorkLimit;
 
     bool fNewDifficultyProtocol = (nHeight >= 0);
