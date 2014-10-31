@@ -17,9 +17,6 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-//#define DBGP2(P1,P2) printf
-#define DBGP2(P1,P2)
-
 using namespace std;
 using namespace boost;
 
@@ -941,42 +938,29 @@ uint256 WantedByOrphan(const CBlock* pblockOrphan)
 
 int generateMTRandom(unsigned int s, int range)
 {
-	random::mt19937 gen(s);
+    random::mt19937 gen(s);
     random::uniform_int_distribution<> dist(0, range);
     return dist(gen);
 }
-
-
 
 static const int64 nMinSubsidy = 1 * COIN;
 static const int CUTOFF_HEIGHT = 100800;	// Height at the end of 5 weeks
 // miner's coin base reward based on nBits
 int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
 {
-        int64 nSubsidy = 500 * COIN;
+    int rand = 0;
+    //int64 nSubsidy = 500 * COIN;
          
-        std::string cseed_str = prevHash.ToString().substr(7,7);
-        const char* cseed = cseed_str.c_str();
-        long seed = hex2long(cseed);
-        int rand = generateMTRandom(seed, 4999);
-        int rand1 = 0;
-        // int rand2 = 0;
-        // int rand3 = 0;
-        // int rand4 = 0;
-        // int rand5 = 0;
-       
-        if(nHeight < 100000)    
-        {
-                nSubsidy = (1 + rand) * COIN;
-        }
-        else
-	{
-                cseed_str = prevHash.ToString().substr(7,7);
-                cseed = cseed_str.c_str();
-                seed = hex2long(cseed);
-                rand1 = generateMTRandom(seed, 1999);
-                nSubsidy = (1 + rand1) * COIN;
-        }
+    std::string cseed_str = prevHash.ToString().substr(7,7);
+    const char* cseed = cseed_str.c_str();
+    long seed = hex2long(cseed);
+
+    if(nHeight < 100000)    
+        rand = generateMTRandom(seed, 4999);
+    else
+        rand = generateMTRandom(seed, 1999);
+
+    int64 nSubsidy = (1 + rand) * COIN;
 
     // Subsidy is cut in half every 1051200 blocks, which will occur approximately every year
     nSubsidy >>= (nHeight / 1051200); // Kumacoin: 1051200 blocks in ~every year
@@ -985,7 +969,6 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
         printf("GetProofOfWorkReward() : create=%s nHeight=0x%08x nSubsidy=%"PRI64d"\n", FormatMoney(nSubsidy).c_str(), nHeight, nSubsidy);
 
     return nSubsidy;
-
 }
 
 // miner's coin stake reward based on nBits and coin age spent (coin-days)
@@ -995,18 +978,18 @@ int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTi
 {
     int64 nRewardCoinYear;
 
-	nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
+    nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
 
-	if(nHeight < YEARLY_BLOCKCOUNT)
-		nRewardCoinYear = 4 * MAX_MINT_PROOF_OF_STAKE;
-	else if(nHeight < (2 * YEARLY_BLOCKCOUNT))
-		nRewardCoinYear = 3 * MAX_MINT_PROOF_OF_STAKE;
-	else if(nHeight < (3 * YEARLY_BLOCKCOUNT))
-		nRewardCoinYear = 2 * MAX_MINT_PROOF_OF_STAKE;
+    if(nHeight < YEARLY_BLOCKCOUNT)
+        nRewardCoinYear = 4 * MAX_MINT_PROOF_OF_STAKE;
+    else if(nHeight < (2 * YEARLY_BLOCKCOUNT))
+        nRewardCoinYear = 3 * MAX_MINT_PROOF_OF_STAKE;
+    else if(nHeight < (3 * YEARLY_BLOCKCOUNT))
+        nRewardCoinYear = 2 * MAX_MINT_PROOF_OF_STAKE;
 
     int64 nSubsidy = nCoinAge * nRewardCoinYear / 365;
 
-	if (fDebug && GetBoolArg("-printcreation"))
+    if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRI64d" nBits=%d\n", FormatMoney(nSubsidy).c_str(), nCoinAge, nBits);
     return nSubsidy;
 }
@@ -1223,7 +1206,7 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-    DBGP2("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
+    if(fDebug) printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
 
 
 
@@ -1325,7 +1308,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 
     // Limit adjustment step
     int64 nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
-    DBGP2("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
+    if(fDebug) printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
 
 
 
