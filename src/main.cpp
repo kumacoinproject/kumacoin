@@ -17,6 +17,9 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
+//#define DBGP2(P1,P2) printf
+#define DBGP2(P1,P2)
+
 using namespace std;
 using namespace boost;
 
@@ -1220,7 +1223,7 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-    printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
+    DBGP2("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
 
 
 
@@ -1322,7 +1325,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 
     // Limit adjustment step
     int64 nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
-    printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
+    DBGP2("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
 
 
 
