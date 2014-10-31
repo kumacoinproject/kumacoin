@@ -1171,9 +1171,9 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
 
     //if v2.0 changes are in effect for block num, alter retarget values 
    if(fNewDifficultyProtocol) {
-      retargetTimespan = nTargetTimespanRe;
-      retargetSpacing = nTargetSpacingRe;
-      retargetInterval = nIntervalRe;
+        retargetTimespan = nTargetTimespanRe;
+        retargetSpacing = nTargetSpacingRe;
+        retargetInterval = nIntervalRe;
     }
     
     // Only change once per interval
@@ -1187,20 +1187,14 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
 		if (pblock->nTime > pindexLast->nTime + retargetSpacing*2)
 			return bnTargetLimit.GetCompact();
 	else {
-*/
-             {
-		// Return the last non-special-min-difficulty-rules-block
-		const CBlockIndex* pindex = pindexPrev;
-		while (pindex->pprev && pindex->nHeight % retargetInterval != 0 && pindex->nBits == bnTargetLimit.GetCompact()) 
-			pindex = pindex->pprev;
-	return pindex->nBits;
-        }
-/*
 	}
-
       } 
 */
-      return pindexPrev->nBits;
+        // Return the last non-special-min-difficulty-rules-block
+        const CBlockIndex* pindex = pindexPrev;
+        while (pindex->pprev && pindex->nHeight % retargetInterval != 0 && pindex->nBits == bnTargetLimit.GetCompact()) 
+            pindex = pindex->pprev;
+        return pindex->nBits;
     }
 
 
@@ -1213,16 +1207,14 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
     
-	// DigiByte: thanks to RealSolid & WDC for this code
-		if(fNewDifficultyProtocol) {
-		  
-			if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
-			if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
-		}
-		else {
-			if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
-			if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
-		}
+    // DigiByte: thanks to RealSolid & WDC for this code
+    if(fNewDifficultyProtocol) {
+        if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
+        if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
+    } else {
+        if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
+        if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
+    }
 
     // Retarget
     bnNew *= nActualTimespan;
