@@ -2285,7 +2285,9 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         return error("AddToBlockIndex() : ComputeNextStakeModifier() failed");
     pindexNew->SetStakeModifier(nStakeModifier, fGeneratedStakeModifier);
     pindexNew->nStakeModifierChecksum = GetStakeModifierChecksum(pindexNew);
-printf("nStakeModifierChecksum:%d\n", pindexNew->nStakeModifierChecksum);
+
+    printf("nStakeModifierChecksum:%d\n", pindexNew->nStakeModifierChecksum);
+
     if (!CheckStakeModifierCheckpoints(pindexNew->nHeight, pindexNew->nStakeModifierChecksum))
         return error("AddToBlockIndex() : Rejected by stake modifier checkpoint height=%d, modifier=0x%016"PRI64x, pindexNew->nHeight, nStakeModifier);
 
@@ -2559,7 +2561,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         bnNewBlock.SetCompact(pblock->nBits);
         CBigNum bnRequired;
 
-		if (pblock->IsProofOfStake())
+        if (pblock->IsProofOfStake())
             bnRequired.SetCompact(ComputeMinStake(GetLastBlockIndex(pcheckpoint, true)->nBits, deltaTime, pblock->nTime));
         else
             bnRequired.SetCompact(ComputeMinWork(GetLastBlockIndex(pcheckpoint, false)->nBits, deltaTime));
@@ -2834,7 +2836,7 @@ bool LoadBlockIndex(bool fAllowNew)
         bnProofOfWorkLimit = bnProofOfWorkLimitTestNet; // 0x0000ffff PoW base target is fixed in testnet
         nStakeMinAge = 20 * 60; // test net min age is 20 min
         nStakeMaxAge = 60 * 60; // test net min age is 60 min
-	nModifierInterval = 60; // test modifier interval is 2 minutes
+        nModifierInterval = 60; // test modifier interval is 1 minutes
         nCoinbaseMaturity = 10; // test maturity is 10 blocks
         nStakeTargetSpacing = 3 * 60; // test block spacing is 3 minutes
     }
@@ -2869,19 +2871,17 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        // block.nTime    = 1391393693;
-	block.nTime    = 1398678972;
+        block.nTime    = 1398678972;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
-        // block.nNonce   = 12565898;
-	block.nNonce   = 12565946;
+        block.nNonce   = 12565946;
 
-	if(fTestNet)
-		block.nNonce = 12565892;
+        if(fTestNet)
+            block.nNonce = 12565892;
 
         //// debug print
         uint256 hash = block.GetHash();
         while (hash > bnProofOfWorkLimit.getuint256()){
-	    printf("Searching for genesis block...\n");
+            printf("Searching for genesis block...\n");
             if (++block.nNonce==0) break;
             hash = block.GetHash();
         }
@@ -2901,10 +2901,10 @@ bool LoadBlockIndex(bool fAllowNew)
         block.print();
 
 
-	if(!fTestNet)
-	        assert(hash == hashGenesisBlock);
-	else
-		assert(hash == hashGenesisBlockTestNet);
+        if(!fTestNet)
+            assert(hash == hashGenesisBlock);
+        else
+            assert(hash == hashGenesisBlockTestNet);
 
         // Start new block file
         unsigned int nFile;
@@ -4287,10 +4287,10 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
         int64 nSearchTime = txCoinStake.nTime; // search to current time
         if (nSearchTime > nLastCoinStakeSearchTime)
         {
-			// printf(">>> OK1\n");
+            // printf(">>> OK1\n");
             if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake))
             {
-				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
+                if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
                 {   // make sure coinstake would meet timestamp protocol
                     // as it would be the same as the block timestamp
                     pblock->vtx[0].vout[0].SetEmpty();
@@ -4731,19 +4731,19 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
         loop
         {
-//            unsigned int nNonceFound;
+            // unsigned int nNonceFound;
 
             hash = pblock->GetHash();
             if (hash <= hashTarget){
                 // nHashesDone += pblock->nNonce;
-		    //pblock->nNonce = ByteReverse(nNonceFound);
-                    assert(hash == pblock->GetHash());
-                    if (!pblock->SignBlock(*pwalletMain))
-                    {
-                        strMintWarning = strMintMessage;
-                        break;
-                    }
-                    strMintWarning = "";
+                // pblock->nNonce = ByteReverse(nNonceFound);
+                assert(hash == pblock->GetHash());
+                if (!pblock->SignBlock(*pwalletMain))
+                {
+                    strMintWarning = strMintMessage;
+                    break;
+                }
+                strMintWarning = "";
 
                 SetThreadPriority(THREAD_PRIORITY_NORMAL);
 
@@ -4766,6 +4766,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
             else
                 // nHashCounter += nHashesDone;
                 nHashCounter += 1;
+
             if (GetTimeMillis() - nHPSTimerStart > 4000)
             {
                 static CCriticalSection cs;
@@ -4788,7 +4789,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
             // Check for stop or if block needs to be rebuilt
             boost::this_thread::interruption_point();
-        // disable in testing
+            // disable in testing
             if (vNodes.empty())
                 break;
             if (++pblock->nNonce >= 0xffff0000)
