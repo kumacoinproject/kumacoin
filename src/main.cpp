@@ -938,42 +938,29 @@ uint256 WantedByOrphan(const CBlock* pblockOrphan)
 
 int generateMTRandom(unsigned int s, int range)
 {
-	random::mt19937 gen(s);
+    random::mt19937 gen(s);
     random::uniform_int_distribution<> dist(0, range);
     return dist(gen);
 }
-
-
 
 static const int64 nMinSubsidy = 1 * COIN;
 static const int CUTOFF_HEIGHT = 100800;	// Height at the end of 5 weeks
 // miner's coin base reward based on nBits
 int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
 {
-        int64 nSubsidy = 500 * COIN;
+    int rand = 0;
+    //int64 nSubsidy = 500 * COIN;
          
-        std::string cseed_str = prevHash.ToString().substr(7,7);
-        const char* cseed = cseed_str.c_str();
-        long seed = hex2long(cseed);
-        int rand = generateMTRandom(seed, 4999);
-        int rand1 = 0;
-        // int rand2 = 0;
-        // int rand3 = 0;
-        // int rand4 = 0;
-        // int rand5 = 0;
-       
-        if(nHeight < 100000)    
-        {
-                nSubsidy = (1 + rand) * COIN;
-        }
-        else
-	{
-                cseed_str = prevHash.ToString().substr(7,7);
-                cseed = cseed_str.c_str();
-                seed = hex2long(cseed);
-                rand1 = generateMTRandom(seed, 1999);
-                nSubsidy = (1 + rand1) * COIN;
-        }
+    std::string cseed_str = prevHash.ToString().substr(7,7);
+    const char* cseed = cseed_str.c_str();
+    long seed = hex2long(cseed);
+
+    if(nHeight < 100000)    
+        rand = generateMTRandom(seed, 4999);
+    else
+        rand = generateMTRandom(seed, 1999);
+
+    int64 nSubsidy = (1 + rand) * COIN;
 
     // Subsidy is cut in half every 1051200 blocks, which will occur approximately every year
     nSubsidy >>= (nHeight / 1051200); // Kumacoin: 1051200 blocks in ~every year
@@ -982,7 +969,6 @@ int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
         printf("GetProofOfWorkReward() : create=%s nHeight=0x%08x nSubsidy=%"PRI64d"\n", FormatMoney(nSubsidy).c_str(), nHeight, nSubsidy);
 
     return nSubsidy;
-
 }
 
 // miner's coin stake reward based on nBits and coin age spent (coin-days)
@@ -992,18 +978,18 @@ int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTi
 {
     int64 nRewardCoinYear;
 
-	nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
+    nRewardCoinYear = MAX_MINT_PROOF_OF_STAKE;
 
-	if(nHeight < YEARLY_BLOCKCOUNT)
-		nRewardCoinYear = 4 * MAX_MINT_PROOF_OF_STAKE;
-	else if(nHeight < (2 * YEARLY_BLOCKCOUNT))
-		nRewardCoinYear = 3 * MAX_MINT_PROOF_OF_STAKE;
-	else if(nHeight < (3 * YEARLY_BLOCKCOUNT))
-		nRewardCoinYear = 2 * MAX_MINT_PROOF_OF_STAKE;
+    if(nHeight < YEARLY_BLOCKCOUNT)
+        nRewardCoinYear = 4 * MAX_MINT_PROOF_OF_STAKE;
+    else if(nHeight < (2 * YEARLY_BLOCKCOUNT))
+        nRewardCoinYear = 3 * MAX_MINT_PROOF_OF_STAKE;
+    else if(nHeight < (3 * YEARLY_BLOCKCOUNT))
+        nRewardCoinYear = 2 * MAX_MINT_PROOF_OF_STAKE;
 
     int64 nSubsidy = nCoinAge * nRewardCoinYear / 365;
 
-	if (fDebug && GetBoolArg("-printcreation"))
+    if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRI64d" nBits=%d\n", FormatMoney(nSubsidy).c_str(), nCoinAge, nBits);
     return nSubsidy;
 }
@@ -1185,9 +1171,9 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
 
     //if v2.0 changes are in effect for block num, alter retarget values 
    if(fNewDifficultyProtocol) {
-      retargetTimespan = nTargetTimespanRe;
-      retargetSpacing = nTargetSpacingRe;
-      retargetInterval = nIntervalRe;
+        retargetTimespan = nTargetTimespanRe;
+        retargetSpacing = nTargetSpacingRe;
+        retargetInterval = nIntervalRe;
     }
     
     // Only change once per interval
@@ -1201,42 +1187,34 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
 		if (pblock->nTime > pindexLast->nTime + retargetSpacing*2)
 			return bnTargetLimit.GetCompact();
 	else {
-*/
-             {
-		// Return the last non-special-min-difficulty-rules-block
-		const CBlockIndex* pindex = pindexPrev;
-		while (pindex->pprev && pindex->nHeight % retargetInterval != 0 && pindex->nBits == bnTargetLimit.GetCompact()) 
-			pindex = pindex->pprev;
-	return pindex->nBits;
-        }
-/*
 	}
-
       } 
 */
-      return pindexPrev->nBits;
+        // Return the last non-special-min-difficulty-rules-block
+        const CBlockIndex* pindex = pindexPrev;
+        while (pindex->pprev && pindex->nHeight % retargetInterval != 0 && pindex->nBits == bnTargetLimit.GetCompact()) 
+            pindex = pindex->pprev;
+        return pindex->nBits;
     }
 
 
     // Limit adjustment step
     int64_t nActualTimespan = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-    printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
+    if(fDebug) printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
 
 
 
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
     
-	// DigiByte: thanks to RealSolid & WDC for this code
-		if(fNewDifficultyProtocol) {
-		  
-			if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
-			if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
-		}
-		else {
-			if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
-			if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
-		}
+    // DigiByte: thanks to RealSolid & WDC for this code
+    if(fNewDifficultyProtocol) {
+        if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
+        if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
+    } else {
+        if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
+        if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
+    }
 
     // Retarget
     bnNew *= nActualTimespan;
@@ -1258,20 +1236,14 @@ unsigned int DigiShield(const CBlockIndex* pindexLast, bool fProofOfStake)
     return bnNew.GetCompact();
 }
 
-unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake) 
+unsigned int NextTarget4491(const CBlockIndex* pindexLast, bool fProofOfStake)
 {
     int nHeight = pindexLast->nHeight + 1;
-
-    if(nHeight > 90000)
-       return DigiShield(pindexLast, fProofOfStake);
-
-    if(nHeight > 4491)
-    {
     CBigNum bnTargetLimit = fProofOfStake ? bnProofOfStakeLimit : bnProofOfWorkLimit;
 
     bool fNewDifficultyProtocol = (nHeight >= 0);
     int blockstogoback = 0;
-	
+
     //set default to pre-v2.0 values
     int retargetTimespan = nTargetTimespanDS;
     int retargetSpacing = nTargetSpacing;
@@ -1281,10 +1253,10 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
         return bnProofOfWorkLimit.GetCompact(); // genesis block
 
     //if v2.0 changes are in effect for block num, alter retarget values 
-   if(fNewDifficultyProtocol) {
-      retargetTimespan = nTargetTimespanRe;
-      retargetSpacing = nTargetSpacingRe;
-      retargetInterval = nIntervalRe;
+    if(fNewDifficultyProtocol) {
+        retargetTimespan = nTargetTimespanRe;
+        retargetSpacing = nTargetSpacingRe;
+        retargetInterval = nIntervalRe;
     }
     
     // Only change once per interval
@@ -1306,7 +1278,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 	}
       }  
 */
-      return pindexLast->nBits;
+        return pindexLast->nBits;
     }
     
     // Kumacoin: This fixes an issue where a 51% attack can change difficulty at will.
@@ -1322,23 +1294,19 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 
     // Limit adjustment step
     int64 nActualTimespan = pindexLast->GetBlockTime() - pindexFirst->GetBlockTime();
-    printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
-
-
+    if(fDebug) printf("  nActualTimespan = %"PRI64d"  before bounds\n", nActualTimespan);
 
     CBigNum bnNew;
     bnNew.SetCompact(pindexLast->nBits);
     
-	// DigiByte: thanks to RealSolid & WDC for this code
-		if(fNewDifficultyProtocol) {
-		  
-			if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
-			if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
-		}
-		else {
-			if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
-			if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
-		}
+    // DigiByte: thanks to RealSolid & WDC for this code
+    if(fNewDifficultyProtocol) {
+        if (nActualTimespan < (retargetTimespan - (retargetTimespan/4)) ) nActualTimespan = (retargetTimespan - (retargetTimespan/4));
+        if (nActualTimespan > (retargetTimespan + (retargetTimespan/2)) ) nActualTimespan = (retargetTimespan + (retargetTimespan/2));
+    } else {
+        if (nActualTimespan < retargetTimespan/4) nActualTimespan = retargetTimespan/4;
+        if (nActualTimespan > retargetTimespan*4) nActualTimespan = retargetTimespan*4;
+    }
 
     // Retarget
     bnNew *= nActualTimespan;
@@ -1355,11 +1323,10 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     if (bnNew > bnTargetLimit)
         bnNew = bnTargetLimit;
 
-
-
     return bnNew.GetCompact();
-    }
-
+}
+unsigned int NextTarget0(const CBlockIndex* pindexLast, bool fProofOfStake)
+{
     if (pindexLast == NULL)
         return bnProofOfWorkLimit.GetCompact(); // genesis block
     const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
@@ -1374,53 +1341,60 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
 //    if(pindexLast->nHeight < 8600)
     if(false)
     {
-	    CBigNum bnNew;
-	    bnNew.SetCompact(pindexPrev->nBits);
-	    if(!fProofOfStake)
-	    {
-		static const int64	BlocksTargetSpacing	= 128; // 128 seconds
-		unsigned int	TimeDaySeconds	= 60 * 60 * 24;
-		int64	PastSecondsMin	= TimeDaySeconds * 0.125;
-		int64	PastSecondsMax	= TimeDaySeconds * 7;
-		uint64	PastBlocksMin	= PastSecondsMin / BlocksTargetSpacing;
-		uint64	PastBlocksMax	= PastSecondsMax / BlocksTargetSpacing;	//7 days of blocks
+        CBigNum bnNew;
+        bnNew.SetCompact(pindexPrev->nBits);
+        if(!fProofOfStake)
+        {
+            static const int64	BlocksTargetSpacing	= 128; // 128 seconds
+            unsigned int	TimeDaySeconds	= 60 * 60 * 24;
+            int64	PastSecondsMin	= TimeDaySeconds * 0.125;
+            int64	PastSecondsMax	= TimeDaySeconds * 7;
+            uint64	PastBlocksMin	= PastSecondsMin / BlocksTargetSpacing;
+            uint64	PastBlocksMax	= PastSecondsMax / BlocksTargetSpacing;	//7 days of blocks
 
-		  return KimotoGravityWell(pindexLast, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax);
-	    }
-	    else
-	    {
-		    if (fDebug)
-			printf("Retarget for Proof of Stake");
+            return KimotoGravityWell(pindexLast, BlocksTargetSpacing, PastBlocksMin, PastBlocksMax);
+        } else {
+            if (fDebug)
+                printf("Retarget for Proof of Stake");
 
-		    // KumaCoin: target change every block
-		    // KumaCoin: retarget with exponential moving toward target spacing
-	    	int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
-		int64 nInterval = nTargetTimespan / nTargetSpacing;
-		bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-		bnNew /= ((nInterval + 1) * nTargetSpacing);
-	    }
+            // KumaCoin: target change every block
+            // KumaCoin: retarget with exponential moving toward target spacing
+            int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
+            int64 nInterval = nTargetTimespan / nTargetSpacing;
+            bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+            bnNew /= ((nInterval + 1) * nTargetSpacing);
+        }
 
-	    if (bnNew > bnProofOfWorkLimit)
-		bnNew = bnProofOfWorkLimit;
+        if (bnNew > bnProofOfWorkLimit)
+            bnNew = bnProofOfWorkLimit;
 
-	    return bnNew.GetCompact();
+        return bnNew.GetCompact();
+    } else {
+        // KumaCoin: target change every block
+        // KumaCoin: retarget with exponential moving toward target spacing
+        CBigNum bnNew;
+        bnNew.SetCompact(pindexPrev->nBits);
+        int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
+        int64 nInterval = nTargetTimespan / nTargetSpacing;
+        bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+        bnNew /= ((nInterval + 1) * nTargetSpacing);
+
+        if (bnNew > bnProofOfWorkLimit)
+            bnNew = bnProofOfWorkLimit;
+
+        return bnNew.GetCompact();
     }
+}
+
+unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake) 
+{
+    int nHeight = pindexLast->nHeight + 1;
+    if(nHeight > 90000)
+        return DigiShield(pindexLast, fProofOfStake);
+    else if(nHeight > 4491)
+        return NextTarget4491(pindexLast, fProofOfStake);
     else
-    {
-		// KumaCoin: target change every block
-		// KumaCoin: retarget with exponential moving toward target spacing
-		CBigNum bnNew;
-		bnNew.SetCompact(pindexPrev->nBits);
-	    	int64 nTargetSpacing = fProofOfStake? nStakeTargetSpacing : min(nTargetSpacingWorkMax, (int64) nStakeTargetSpacing * (1 + pindexLast->nHeight - pindexPrev->nHeight));
-		int64 nInterval = nTargetTimespan / nTargetSpacing;
-		bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
-		bnNew /= ((nInterval + 1) * nTargetSpacing);
-
-		if (bnNew > bnProofOfWorkLimit)
-		bnNew = bnProofOfWorkLimit;
-
-		return bnNew.GetCompact();
-    }
+        return NextTarget0(pindexLast, fProofOfStake);
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)
@@ -2311,7 +2285,9 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
         return error("AddToBlockIndex() : ComputeNextStakeModifier() failed");
     pindexNew->SetStakeModifier(nStakeModifier, fGeneratedStakeModifier);
     pindexNew->nStakeModifierChecksum = GetStakeModifierChecksum(pindexNew);
-printf("nStakeModifierChecksum:%d\n", pindexNew->nStakeModifierChecksum);
+
+    printf("nStakeModifierChecksum:%d\n", pindexNew->nStakeModifierChecksum);
+
     if (!CheckStakeModifierCheckpoints(pindexNew->nHeight, pindexNew->nStakeModifierChecksum))
         return error("AddToBlockIndex() : Rejected by stake modifier checkpoint height=%d, modifier=0x%016"PRI64x, pindexNew->nHeight, nStakeModifier);
 
@@ -2585,7 +2561,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         bnNewBlock.SetCompact(pblock->nBits);
         CBigNum bnRequired;
 
-		if (pblock->IsProofOfStake())
+        if (pblock->IsProofOfStake())
             bnRequired.SetCompact(ComputeMinStake(GetLastBlockIndex(pcheckpoint, true)->nBits, deltaTime, pblock->nTime));
         else
             bnRequired.SetCompact(ComputeMinWork(GetLastBlockIndex(pcheckpoint, false)->nBits, deltaTime));
@@ -2860,7 +2836,7 @@ bool LoadBlockIndex(bool fAllowNew)
         bnProofOfWorkLimit = bnProofOfWorkLimitTestNet; // 0x0000ffff PoW base target is fixed in testnet
         nStakeMinAge = 20 * 60; // test net min age is 20 min
         nStakeMaxAge = 60 * 60; // test net min age is 60 min
-	nModifierInterval = 60; // test modifier interval is 2 minutes
+        nModifierInterval = 60; // test modifier interval is 1 minutes
         nCoinbaseMaturity = 10; // test maturity is 10 blocks
         nStakeTargetSpacing = 3 * 60; // test block spacing is 3 minutes
     }
@@ -2895,19 +2871,17 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        // block.nTime    = 1391393693;
-	block.nTime    = 1398678972;
+        block.nTime    = 1398678972;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
-        // block.nNonce   = 12565898;
-	block.nNonce   = 12565946;
+        block.nNonce   = 12565946;
 
-	if(fTestNet)
-		block.nNonce = 12565892;
+        if(fTestNet)
+            block.nNonce = 12565892;
 
         //// debug print
         uint256 hash = block.GetHash();
         while (hash > bnProofOfWorkLimit.getuint256()){
-	    printf("Searching for genesis block...\n");
+            printf("Searching for genesis block...\n");
             if (++block.nNonce==0) break;
             hash = block.GetHash();
         }
@@ -2927,10 +2901,10 @@ bool LoadBlockIndex(bool fAllowNew)
         block.print();
 
 
-	if(!fTestNet)
-	        assert(hash == hashGenesisBlock);
-	else
-		assert(hash == hashGenesisBlockTestNet);
+        if(!fTestNet)
+            assert(hash == hashGenesisBlock);
+        else
+            assert(hash == hashGenesisBlockTestNet);
 
         // Start new block file
         unsigned int nFile;
@@ -4313,10 +4287,10 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
         int64 nSearchTime = txCoinStake.nTime; // search to current time
         if (nSearchTime > nLastCoinStakeSearchTime)
         {
-			// printf(">>> OK1\n");
+            // printf(">>> OK1\n");
             if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake))
             {
-				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
+                if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
                 {   // make sure coinstake would meet timestamp protocol
                     // as it would be the same as the block timestamp
                     pblock->vtx[0].vout[0].SetEmpty();
@@ -4757,19 +4731,19 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
         loop
         {
-//            unsigned int nNonceFound;
+            // unsigned int nNonceFound;
 
             hash = pblock->GetHash();
             if (hash <= hashTarget){
                 // nHashesDone += pblock->nNonce;
-		    //pblock->nNonce = ByteReverse(nNonceFound);
-                    assert(hash == pblock->GetHash());
-                    if (!pblock->SignBlock(*pwalletMain))
-                    {
-                        strMintWarning = strMintMessage;
-                        break;
-                    }
-                    strMintWarning = "";
+                // pblock->nNonce = ByteReverse(nNonceFound);
+                assert(hash == pblock->GetHash());
+                if (!pblock->SignBlock(*pwalletMain))
+                {
+                    strMintWarning = strMintMessage;
+                    break;
+                }
+                strMintWarning = "";
 
                 SetThreadPriority(THREAD_PRIORITY_NORMAL);
 
@@ -4792,6 +4766,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
             else
                 // nHashCounter += nHashesDone;
                 nHashCounter += 1;
+
             if (GetTimeMillis() - nHPSTimerStart > 4000)
             {
                 static CCriticalSection cs;
@@ -4814,7 +4789,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
             // Check for stop or if block needs to be rebuilt
             boost::this_thread::interruption_point();
-        // disable in testing
+            // disable in testing
             if (vNodes.empty())
                 break;
             if (++pblock->nNonce >= 0xffff0000)
