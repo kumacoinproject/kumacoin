@@ -543,7 +543,6 @@ public:
     void SetDestination(const CTxDestination& address);
     void SetMultisig(int nRequired, const std::vector<CKey>& keys);
 
-
     void PrintHex() const
     {
         printf("CScript(%s)\n", HexStr(begin(), end(), true).c_str());

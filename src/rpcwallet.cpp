@@ -756,22 +756,13 @@ Value sendmany(const Array& params, bool fHelp)
     return wtx.GetHash().GetHex();
 }
 
-Value addmultisigaddress(const Array& params, bool fHelp)
+//
+// Used by addmultisigaddress / createmultisig:
+//
+static CScript _createmultisig(const Array& params)
 {
-    if (fHelp || params.size() < 2 || params.size() > 3)
-    {
-        string msg = "addmultisigaddress <nrequired> <'[\"key\",\"key\"]'> [account]\n"
-            "Add a nrequired-to-sign multisignature address to the wallet\"\n"
-            "each key is a KumaCoin address or hex-encoded public key\n"
-            "If [account] is specified, assign address to [account].";
-        throw runtime_error(msg);
-    }
-
     int nRequired = params[0].get_int();
     const Array& keys = params[1].get_array();
-    string strAccount;
-    if (params.size() > 2)
-        strAccount = AccountFromValue(params[2]);
 
     // Gather public keys
     if (nRequired < 1)
@@ -814,10 +805,28 @@ Value addmultisigaddress(const Array& params, bool fHelp)
             throw runtime_error(" Invalid public key: "+ks);
         }
     }
+    CScript result;
+    result.SetMultisig(nRequired, pubkeys);
+    return result;
+}
+
+Value addmultisigaddress(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 2 || params.size() > 3)
+    {
+        string msg = "addmultisigaddress <nrequired> <'[\"key\",\"key\"]'> [account]\n"
+            "Add a nrequired-to-sign multisignature address to the wallet\"\n"
+            "each key is a limecoin address or hex-encoded public key\n"
+            "If [account] is specified, assign address to [account].";
+        throw runtime_error(msg);
+    }
+
+    string strAccount;
+    if (params.size() > 2)
+        strAccount = AccountFromValue(params[2]);
 
     // Construct using pay-to-script-hash:
-    CScript inner;
-    inner.SetMultisig(nRequired, pubkeys);
+    CScript inner = _createmultisig(params);
     CScriptID innerID = inner.GetID();
     pwalletMain->AddCScript(inner);
 
@@ -825,6 +834,29 @@ Value addmultisigaddress(const Array& params, bool fHelp)
     return CBitcoinAddress(innerID).ToString();
 }
 
+Value createmultisig(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 2 || params.size() > 2)
+    {
+        string msg = "createmultisig <nrequired> <'[\"key\",\"key\"]'>\n"
+            "Creates a multi-signature address and returns a json object\n"
+            "with keys:\n"
+            "address : limecoin address\n"
+            "redeemScript : hex-encoded redemption script";
+        throw runtime_error(msg);
+    }
+
+    // Construct using pay-to-script-hash:
+    CScript inner = _createmultisig(params);
+    CScriptID innerID = inner.GetID();
+    CBitcoinAddress address(innerID);
+
+    Object result;
+    result.push_back(Pair("address", address.ToString()));
+    result.push_back(Pair("redeemScript", HexStr(inner.begin(), inner.end())));
+
+    return result;
+}
 
 struct tallyitem
 {
@@ -970,24 +1002,24 @@ void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDe
     bool fAllAccounts = (strAccount == string("*"));
 
     // Generated blocks assigned to account ""
-    if ((nGeneratedMature+nGeneratedImmature) != 0 && (fAllAccounts || strAccount == ""))
-    {
-        Object entry;
-        entry.push_back(Pair("account", string("")));
-        if (nGeneratedImmature)
-        {
-            entry.push_back(Pair("category", wtx.GetDepthInMainChain() ? "immature" : "orphan"));
-            entry.push_back(Pair("amount", ValueFromAmount(nGeneratedImmature)));
-        }
-        else
-        {
-            entry.push_back(Pair("category", "generate"));
-            entry.push_back(Pair("amount", ValueFromAmount(nGeneratedMature)));
-        }
-        if (fLong)
-            WalletTxToJSON(wtx, entry);
-        ret.push_back(entry);
-    }
+//    if ((nGeneratedMature+nGeneratedImmature) != 0 && (fAllAccounts || strAccount == ""))
+//    {
+//        Object entry;
+//        entry.push_back(Pair("account", string("")));
+//        if (nGeneratedImmature)
+//        {
+//            entry.push_back(Pair("category", wtx.GetDepthInMainChain() ? "immature" : "orphan"));
+//            entry.push_back(Pair("amount", ValueFromAmount(nGeneratedImmature)));
+//        }
+//        else
+//        {
+//            entry.push_back(Pair("category", "generate"));
+//            entry.push_back(Pair("amount", ValueFromAmount(nGeneratedMature)));
+//        }
+//        if (fLong)
+//            WalletTxToJSON(wtx, entry);
+//        ret.push_back(entry);
+//    }
 
     // Sent
     if ((!listSent.empty() || nFee != 0) && (fAllAccounts || strAccount == strSentAccount))
