@@ -45,6 +45,9 @@ unsigned int nStakeMinAge = 60 * 60 * 24 * 5;	// minimum age for coin age: 5d
 unsigned int nStakeMaxAge = 60 * 60 * 24 * 40;	// stake age of full weight: 40d
 unsigned int nStakeTargetSpacing = 128;			// 128 sec block spacing
 unsigned int nHStab = 2 * 5 * 100;
+bool bRemotePaymentsEnabled = false;
+bool bOPReturnEnabled = true;
+bool bOptionPaymentsEnabled = false;
 // int64 nChainStartTime = 1394386088;
 int64 nChainStartTime = 1398678972;
 // int nCoinbaseMaturity = 39;
@@ -320,6 +323,18 @@ bool CTransaction::IsStandard() const
     }
     return true;
 }
+
+//
+// Check transaction inputs, and make sure any
+// pay-to-script-hash transactions are evaluating IsStandard scripts
+//
+// Why bother? To avoid denial-of-service attacks; an attacker
+// can submit a standard HASH... OP_EQUAL transaction,
+// which will get accepted into blocks. The redemption
+// script can be anything; an attacker could use a very
+// expensive-to-check-upon-redemption script like:
+//   DUP CHECKSIG DROP ... repeated 100 times... OP_1
+//
 
 //
 // Check transaction inputs, and make sure any

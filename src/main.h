@@ -28,6 +28,7 @@ class CNode;
 
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
+static const unsigned int MAX_STANDARD_TX_SIZE = MAX_BLOCK_SIZE_GEN/5;
 static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
 static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
 static const unsigned int MAX_INV_SZ = 50000;
@@ -85,6 +86,11 @@ extern CCriticalSection cs_setpwalletRegistered;
 extern std::set<CWallet*> setpwalletRegistered;
 extern unsigned char pchMessageStart[4];
 extern std::map<uint256, CBlock*> mapOrphanBlocks;
+
+extern bool bRemotePaymentsEnabled;
+extern bool bOPReturnEnabled;
+extern bool bOptionPaymentsEnabled;
+
 
 // Settings
 extern int64_t nTransactionFee;
@@ -717,7 +723,12 @@ protected:
     const CTxOut& GetOutputFor(const CTxIn& input, const MapPrevTx& inputs) const;
 };
 
+/** Check for standard transaction types
+    @return True if all outputs (scriptPubKeys) use only standard transaction forms
+*/
+bool IsStandardTx(const CTransaction& tx);
 
+bool IsFinalTx(const CTransaction &tx, int nBlockHeight = 0, int64_t nBlockTime = 0);
 
 
 

@@ -102,6 +102,7 @@ const char* GetTxnOutputType(txnouttype t)
     case TX_PUBKEYHASH: return "pubkeyhash";
     case TX_SCRIPTHASH: return "scripthash";
     case TX_MULTISIG: return "multisig";
+    case TX_NULL_DATA: return "nulldata";
     }
     return NULL;
 }
@@ -243,6 +244,7 @@ const char* GetOpName(opcodetype opcode)
     // template matching params
     case OP_PUBKEYHASH             : return "OP_PUBKEYHASH";
     case OP_PUBKEY                 : return "OP_PUBKEY";
+    case OP_SMALLDATA              : return "OP_SMALLDATA";
 
     case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
     default:
@@ -1232,6 +1234,11 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, vector<vector<unsi
 
         // Sender provides N pubkeys, receivers provides M signatures
         mTemplates.insert(make_pair(TX_MULTISIG, CScript() << OP_SMALLINTEGER << OP_PUBKEYS << OP_SMALLINTEGER << OP_CHECKMULTISIG));
+
+        // Empty, provably prunable, data-carrying output
+        mTemplates.insert(make_pair(TX_NULL_DATA, CScript() << OP_RETURN << OP_SMALLDATA));
+
+        mTemplates.insert(make_pair(TX_NULL_DATA, CScript() << OP_RETURN));
     }
 
     // Shortcut for pay-to-script-hash, which are more constrained than the other types:
@@ -1316,6 +1323,12 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, vector<vector<unsi
                 else
                     break;
             }
+            else if (opcode2 == OP_SMALLDATA)
+            {
+                // small pushdata, <= MAX_OP_RETURN_RELAY bytes
+                if (vch1.size() > MAX_OP_RETURN_RELAY)
+                    break;
+            }
             else if (opcode1 != opcode2 || vch1 != vch2)
             {
                 // Others must match exactly
@@ -1378,6 +1391,7 @@ bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash
     switch (whichTypeRet)
     {
     case TX_NONSTANDARD:
+    case TX_NULL_DATA:
         return false;
     case TX_PUBKEY:
         keyID = CPubKey(vSolutions[0]).GetID();
@@ -1409,6 +1423,9 @@ int ScriptSigArgsExpected(txnouttype t, const std::vector<std::vector<unsigned c
     {
     case TX_NONSTANDARD:
         return -1;
+    case TX_NULL_DATA:
+		return (bOPReturnEnabled) ? -1 : -1;
+		// Script Sig Args Expected:  Bitcoin=-1, PPCoin=1
     case TX_PUBKEY:
         return 1;
     case TX_PUBKEYHASH:
@@ -1443,7 +1460,6 @@ bool IsStandard(const CScript& scriptPubKey)
 
     return whichType != TX_NONSTANDARD;
 }
-
 
 unsigned int HaveKeys(const vector<valtype>& pubkeys, const CKeyStore& keystore)
 {
@@ -1485,7 +1501,9 @@ bool IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
     switch (whichType)
     {
     case TX_NONSTANDARD:
-        return false;
+    case TX_NULL_DATA:
+		// Note this was always false, til 3-13-2016.
+		return (bOPReturnEnabled) ? true : false;
     case TX_PUBKEY:
         keyID = CPubKey(vSolutions[0]).GetID();
         return keystore.HaveKey(keyID);
@@ -1520,6 +1538,9 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
     if (!Solver(scriptPubKey, whichType, vSolutions))
         return false;
 
+    if (bOPReturnEnabled && whichType == TX_NULL_DATA)
+        return true;
+
     if (whichType == TX_PUBKEY)
     {
         addressRet = CPubKey(vSolutions[0]).GetID();
@@ -1546,6 +1567,11 @@ bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, vecto
     vector<valtype> vSolutions;
     if (!Solver(scriptPubKey, typeRet, vSolutions))
         return false;
+    if (typeRet == TX_NULL_DATA)
+	{
+        // This is data, not addresses
+        return false;
+    }
 
     if (typeRet == TX_MULTISIG)
     {
@@ -1735,6 +1761,7 @@ static CScript CombineSignatures(CScript scriptPubKey, const CTransaction& txTo,
     switch (txType)
     {
     case TX_NONSTANDARD:
+    case TX_NULL_DATA:
         // Don't know anything about this, assume bigger one is correct:
         if (sigs1.size() >= sigs2.size())
             return PushAll(sigs1);
