@@ -4,6 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/tuple/tuple_comparison.hpp>
 
 using namespace std;
 using namespace boost;
@@ -1422,10 +1423,8 @@ int ScriptSigArgsExpected(txnouttype t, const std::vector<std::vector<unsigned c
     switch (t)
     {
     case TX_NONSTANDARD:
-        return -1;
     case TX_NULL_DATA:
-		return (bOPReturnEnabled) ? -1 : -1;
-		// Script Sig Args Expected:  Bitcoin=-1, PPCoin=1
+	        return -1;
     case TX_PUBKEY:
         return 1;
     case TX_PUBKEYHASH:
@@ -1440,10 +1439,9 @@ int ScriptSigArgsExpected(txnouttype t, const std::vector<std::vector<unsigned c
     return -1;
 }
 
-bool IsStandard(const CScript& scriptPubKey)
+bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType)
 {
     vector<valtype> vSolutions;
-    txnouttype whichType;
     if (!Solver(scriptPubKey, whichType, vSolutions))
         return false;
 
@@ -1502,8 +1500,7 @@ bool IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
     {
     case TX_NONSTANDARD:
     case TX_NULL_DATA:
-		// Note this was always false, til 3-13-2016.
-		return (bOPReturnEnabled) ? true : false;
+        return false;
     case TX_PUBKEY:
         keyID = CPubKey(vSolutions[0]).GetID();
         return keystore.HaveKey(keyID);
@@ -1537,9 +1534,6 @@ bool ExtractDestination(const CScript& scriptPubKey, CTxDestination& addressRet)
     txnouttype whichType;
     if (!Solver(scriptPubKey, whichType, vSolutions))
         return false;
-
-    if (bOPReturnEnabled && whichType == TX_NULL_DATA)
-        return true;
 
     if (whichType == TX_PUBKEY)
     {
