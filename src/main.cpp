@@ -368,9 +368,9 @@ bool IsStandardTx(const CTransaction& tx, string& reason)
             reason = "scriptpubkey";
             return false;
         }
-        if (whichType == TX_NULL_DATA)
-            nDataOut++;
-        if (txout.nValue == 0) {
+		if (whichType == TX_NULL_DATA) {
+			nDataOut++;
+		}else if (txout.nValue == 0) {
             reason = "dust";
             return false;
         }
@@ -652,7 +652,7 @@ bool CTxMemPool::accept(CTxDB& txdb, CTransaction &tx, bool fCheckInputs,
     // Rather not work on nonstandard transactions (unless -testnet)
     string reason;
     if (!fTestNet && !IsStandardTx(tx, reason))
-	return error("CTxMemPool::accept() : nonstandard transaction type");
+	return error( ("CTxMemPool::accept() : nonstandard transaction type:"+ reason).c_str() );
 
     // Do we already have it?
     uint256 hash = tx.GetHash();
