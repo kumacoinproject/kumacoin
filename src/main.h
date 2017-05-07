@@ -44,6 +44,9 @@ static const int64 MAX_MINT_PROOF_OF_STAKE = 0.05 * COIN;	// 5% annual interest
 
 static const int64 MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
+/* hmq1725 fork */
+static const int64 SWITCH_HMQ1725_BLOCK = 100000000;
+
 inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
@@ -855,6 +858,7 @@ public:
     int nVersion;
     uint256 hashPrevBlock;
     uint256 hashMerkleRoot;
+	unsigned int nHeight;
     unsigned int nTime;
     unsigned int nBits;
     unsigned int nNonce;
@@ -919,9 +923,18 @@ public:
         return (nBits == 0);
     }
 
-    uint256 GetHash() const
+    uint256 GetPoWHash(unsigned int nHeight) const
     {
-        return Hash9(BEGIN(nVersion), END(nNonce));
+		//return Hash9(BEGIN(nVersion), END(nNonce));
+		//return HMQ1725(BEGIN(nVersion), END(nNonce));
+		uint256 thash;
+		if ((fTestNet && nHeight >= 5) || nHeight >= SWITCH_HMQ1725_BLOCK ) {
+			thash = HMQ1725(BEGIN(nVersion), END(nNonce));
+		}
+		else {
+			thash = Hash9(BEGIN(nVersion), END(nNonce));
+		}
+		return thash;
     }
 
     int64 GetBlockTime() const
@@ -935,9 +948,9 @@ public:
     unsigned int GetStakeEntropyBit(unsigned int nHeight) const
     {
         // Take last bit of block hash as entropy bit
-        unsigned int nEntropyBit = ((GetHash().Get64()) & 1llu);
+        unsigned int nEntropyBit = ((GetPoWHash(nHeight).Get64()) & 1llu);
         if (fDebug && GetBoolArg("-printstakemodifier"))
-            printf("GetStakeEntropyBit: nHeight=%u hashBlock=%s nEntropyBit=%u\n", nHeight, GetHash().ToString().c_str(), nEntropyBit);
+            printf("GetStakeEntropyBit: nHeight=%u hashBlock=%s nEntropyBit=%u\n", nHeight, GetPoWHash(nHeight).ToString().c_str(), nEntropyBit);
         return nEntropyBit;
     }
 
@@ -1411,7 +1424,7 @@ public:
         block.nTime           = nTime;
         block.nBits           = nBits;
         block.nNonce          = nNonce;
-        return block.GetHash();
+        return block.GetPoWHash(nHeight);
     }
 
 
