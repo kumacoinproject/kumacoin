@@ -509,7 +509,7 @@ int CMerkleTx::SetMerkleBranch(const CBlock* pblock)
         }
 
         // Update the tx's hashBlock
-        hashBlock = pblock->GetHash();
+        hashBlock = pblock->GetPoWHash(pindexBest->nHeight);
 
         // Locate the transaction
         for (nIndex = 0; nIndex < (int)pblock->vtx.size(); nIndex++)
@@ -956,7 +956,7 @@ bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock)
         {
             CBlock block;
             if (block.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, false))
-                hashBlock = block.GetHash();
+                hashBlock = block.GetPoWHash();
             return true;
         }
     }
@@ -1008,7 +1008,7 @@ uint256 static GetOrphanRoot(const CBlock* pblock)
     // Work back to the first block in the orphan chain
     while (mapOrphanBlocks.count(pblock->hashPrevBlock))
         pblock = mapOrphanBlocks[pblock->hashPrevBlock];
-    return pblock->GetHash();
+    return pblock->GetPoWHash(pblock->nHeight);
 }
 
 
@@ -1421,7 +1421,9 @@ unsigned int NextTarget0(const CBlockIndex* pindexLast, bool fProofOfStake)
     const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
     if (pindexPrevPrev->pprev == NULL)
         return bnProofOfStakeLimit.GetCompact(); // second block
-        
+	if (pindexLast->nHeight + 1 == SWITCH_HMQ1725_BLOCK )
+		return bnProofOfStakeLimit.GetCompact(); // reset diff for hmq1725 fork block
+
     int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
 
 //    if(pindexLast->nHeight < 8600)
@@ -2609,7 +2611,7 @@ bool CBlockIndex::IsSuperMajority(int minVersion, const CBlockIndex* pstart, uns
 bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 {
     // Check for duplicate
-    uint256 hash = pblock->GetHash();
+    uint256 hash = pblock->GetPoWHash(pblock->nHeight);
     if (mapBlockIndex.count(hash))
         return error("ProcessBlock() : already have block %d %s", mapBlockIndex[hash]->nHeight, hash.ToString().substr(0,20).c_str());
     if (mapOrphanBlocks.count(hash))
@@ -2710,8 +2712,8 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         {
             CBlock* pblockOrphan = (*mi).second;
             if (pblockOrphan->AcceptBlock())
-                vWorkQueue.push_back(pblockOrphan->GetHash());
-            mapOrphanBlocks.erase(pblockOrphan->GetHash());
+                vWorkQueue.push_back(pblockOrphan->GetPoWHash(pblock->nHeight));
+            mapOrphanBlocks.erase(pblockOrphan->GetPoWHash(pblock->nHeight));
             setStakeSeenOrphan.erase(pblockOrphan->GetProofOfStake());
             delete pblockOrphan;
         }
@@ -2965,11 +2967,11 @@ bool LoadBlockIndex(bool fAllowNew)
             block.nNonce = 12565892;
 
         //// debug print
-        uint256 hash = block.GetHash();
+        uint256 hash = block.GetPoWHash(SWITCH_HMQ1725_BLOCK - 1);
         while (hash > bnProofOfWorkLimit.getuint256()){
             printf("Searching for genesis block...\n");
             if (++block.nNonce==0) break;
-            hash = block.GetHash();
+            hash = block.GetPoWHash(SWITCH_HMQ1725_BLOCK - 1);
         }
 
         printf("%s\n", hash.ToString().c_str());
@@ -2980,7 +2982,7 @@ bool LoadBlockIndex(bool fAllowNew)
 
 
         //// debug print
-        printf("block.GetHash() == %s\n", block.GetHash().ToString().c_str());
+        printf("block.GetHash() == %s\n", block.GetPoWHash(SWITCH_HMQ1725_BLOCK - 1).ToString().c_str());
         printf("block.hashMerkleRoot == %s\n", block.hashMerkleRoot.ToString().c_str());
         printf("block.nTime = %u \n", block.nTime);
         printf("block.nNonce = %u \n", block.nNonce);
@@ -3077,7 +3079,7 @@ void PrintBlockTree()
             pindex->nHeight,
             pindex->nFile,
             pindex->nBlockPos,
-            block.GetHash().ToString().c_str(),
+            block.GetPoWHash(pindex->nHeight).ToString().c_str(),
             block.nBits,
             DateTimeStrFormat("%x %H:%M:%S", block.GetBlockTime()).c_str(),
             FormatMoney(pindex->nMint).c_str(),
@@ -4667,7 +4669,7 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
 
 bool CheckWork(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
 {
-    uint256 hash = pblock->GetHash();
+    uint256 hash = pblock->GetPoWHash(pblock->nHeight);
     uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
 
     if (hash > hashTarget && pblock->IsProofOfWork())
@@ -4691,7 +4693,7 @@ bool CheckWork(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
         // Track how many getdata requests this block gets
         {
             LOCK(wallet.cs_wallet);
-            wallet.mapRequestCount[pblock->GetHash()] = 0;
+            wallet.mapRequestCount[pblock->GetPoWHash(pblock->nHeight)] = 0;
         }
 
         // Process this block the same as if we had received it from another node

@@ -94,7 +94,19 @@ OBJS= \
     obj/groestl.o\
     obj/jh.o\
     obj/keccak.o\
-    obj/skein.o
+    obj/skein.o\
+    obj/cubehash.o \
+    obj/luffa.o \
+    obj/aes_helper.o \
+    obj/echo.o \
+    obj/shavite.o \
+    obj/simd.o \
+    obj/hamsi.o \
+    obj/fugue.o \
+    obj/shabal.o \
+    obj/whirlpool.o \
+    obj/haval.o \
+    obj/sha2big.o
 
 
 all: kumacoind.exe
