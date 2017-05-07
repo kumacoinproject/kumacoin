@@ -247,11 +247,20 @@ Value getworkex(const Array& params, bool fHelp)
     {
         // Parse parameters
         vector<unsigned char> vchData = ParseHex(params[0].get_str());
-        vector<unsigned char> coinbase;
+		vector<unsigned char> coinbase;
+        
+		if(params.size() == 2)
+			coinbase = ParseHex(params[1].get_str());
 
-        if(params.size() == 2)
-            coinbase = ParseHex(params[1].get_str());
+		//FIXME: LastHeight is in the block header
+		/*
+		for (int i = 0; i < 4; i++)
+		{
+			vchData.insert(vchData.begin(), 0);
+		}
 
+		if (vchData.size() != 132)
+		*/
         if (vchData.size() != 128)
             throw JSONRPCError(-8, "Invalid parameter");
 
