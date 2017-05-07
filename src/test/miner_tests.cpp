@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
         pblock->hashMerkleRoot = pblock->BuildMerkleTree();
         pblock->nNonce = blockinfo[i].nonce;
         assert(ProcessBlock(NULL, pblock));
-        pblock->hashPrevBlock = pblock->GetHash();
+        pblock->hashPrevBlock = pblock->GetPoWHash(pindexBest->nHeight);
     }
     delete pblock;
 
