@@ -182,13 +182,25 @@ HEADERS += src/qt/bitcoingui.h \
     src/netbase.h \
     src/clientversion.h \
     src/hashblock.h \
-    src/sph_blake.h \
-    src/sph_skein.h \
-    src/sph_keccak.h \
-    src/sph_jh.h \
-    src/sph_groestl.h \
-    src/sph_bmw.h \
-    src/sph_types.h
+    src/sph/sph_blake.h \
+    src/sph/sph_bmw.h \
+    src/sph/sph_groestl.h \
+    src/sph/sph_jh.h \
+    src/sph/sph_keccak.h \
+    src/sph/sph_skein.h \
+    src/sph/sph_types.h \
+    #ADDED FOR HMQ1725
+    src/sph/sph_luffa.h \
+    src/sph/sph_cubehash.h \
+    src/sph/sph_echo.h \
+    src/sph/sph_shavite.h \
+    src/sph/sph_simd.h \
+    src/sph/sph_hamsi.h \
+    src/sph/sph_fugue.h \
+    src/sph/sph_shabal.h \
+    src/sph/sph_whirlpool.h \
+    src/sph/sph_haval.h \
+    src/sph/sph_sha2.h
 
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
@@ -255,12 +267,23 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/scrypt-x86_64.S \
     src/scrypt_mine.cpp \
     src/pbkdf2.cpp \
-    src/blake.c \
-    src/bmw.c \
-    src/groestl.c \
-    src/jh.c \
-    src/keccak.c \
-    src/skein.c
+    src/sph/blake.c \
+    src/sph/bmw.c \
+    src/sph/groestl.c \
+    src/sph/jh.c \
+    src/sph/keccak.c \
+    src/sph/skein.c \
+    src/sph/luffa.c \
+    src/sph/cubehash.c \
+    src/sph/shavite.c \
+    src/sph/echo.c \
+    src/sph/simd.c \
+    src/sph/hamsi.c \
+    src/sph/fugue.c \
+    src/sph/shabal.c \
+    src/sph/whirlpool.c \
+    src/sph/haval.c \
+    src/sph/sha2big.c
 
 
 RESOURCES += \
