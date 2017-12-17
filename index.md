@@ -66,9 +66,8 @@ kuma MD pool：<br>
 ***
 
 ### EXCHANGES（取引所）
-* <S>AllCoin.com</S><br>
+* [CRYPTOPIA](https://www.cryptopia.co.nz/Exchange/?market=KUMA_LTC)<br>
 * [もなとれ](https://monatr.jp/trade/kuma_mona)<br>
-* [MonacoEX](https://trade.monaco-ex.org/)
 
 ***
 
