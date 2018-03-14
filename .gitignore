@@ -1,0 +1,6 @@
+*.exe
+*.qm
+kumacoin-qt
+kumacoind
+Makefile
+qrc_bitcoin.cpp
