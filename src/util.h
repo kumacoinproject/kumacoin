@@ -627,5 +627,10 @@ inline uint32_t ByteReverse(uint32_t value)
     return (value<<16) | (value>>16);
 }
 
+inline boost::filesystem::path GetDebugLogFilePath() {
+    std::string path = GetArg("-debuglog", "");
+    return path.empty() ? GetDataDir() / "debug.log" : path;
+}
+
 #endif
 

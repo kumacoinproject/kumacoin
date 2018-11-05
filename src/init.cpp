@@ -267,6 +267,7 @@ std::string HelpMessage()
 #endif
         "  -testnet               " + _("Use the test network") + "\n" +
         "  -debug                 " + _("Output extra debugging information. Implies all other -debug* options") + "\n" +
+        "  -debuglog              " + _("Set debug.log path") + "\n" +
         "  -debugnet              " + _("Output extra network debugging information") + "\n" +
         "  -logtimestamps         " + _("Prepend debug output with timestamp") + "\n" +
         "  -shrinkdebugfile       " + _("Shrink debug.log file on client startup (default: 1 when no -debug)") + "\n" +
