@@ -217,8 +217,7 @@ inline int OutputDebugStringF(const char* pszFormat, ...)
 
         if (!fileout)
         {
-            boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
-            fileout = fopen(pathDebug.string().c_str(), "a");
+            fileout = fopen(GetDebugLogFilePath().string().c_str(), "a");
             if (fileout) setbuf(fileout, NULL); // unbuffered
         }
         if (fileout)
@@ -236,8 +235,7 @@ inline int OutputDebugStringF(const char* pszFormat, ...)
             // reopen the log file, if requested
             if (fReopenDebugLog) {
                 fReopenDebugLog = false;
-                boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
-                if (freopen(pathDebug.string().c_str(),"a",fileout) != NULL)
+                if (freopen(GetDebugLogFilePath().string().c_str(),"a",fileout) != NULL)
                     setbuf(fileout, NULL); // unbuffered
             }
 
@@ -1196,7 +1194,7 @@ int GetFilesize(FILE* file)
 void ShrinkDebugFile()
 {
     // Scroll debug.log if it's getting too big
-    boost::filesystem::path pathLog = GetDataDir() / "debug.log";
+    boost::filesystem::path pathLog = GetDebugLogFilePath();
     FILE* file = fopen(pathLog.string().c_str(), "r");
     if (file && GetFilesize(file) > 10 * 1000000)
     {
