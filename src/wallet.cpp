@@ -1,5 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
+// Copyright (c) 2011-2018 The Peercoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -632,21 +633,19 @@ int CWalletTx::GetRequestCount() const
     return nRequests;
 }
 
-void CWalletTx::GetAmounts(int64& nGeneratedImmature, int64& nGeneratedMature, list<pair<CTxDestination, int64> >& listReceived,
-                           list<pair<CTxDestination, int64> >& listSent, int64& nFee, string& strSentAccount) const
+void CWalletTx::GetAmounts(int64 &nGeneratedImmature, int64 &nGeneratedMature, list<pair<CTxDestination, int64> > &listReceived,
+                           list<pair<CTxDestination, int64> > &listSent, int64 &nFee, string &strSentAccount) const
 {
     nGeneratedImmature = nGeneratedMature = nFee = 0;
     listReceived.clear();
     listSent.clear();
     strSentAccount = strFromAccount;
 
-    if (IsCoinBase() || IsCoinStake())
-    {
+    if (IsCoinBase() || IsCoinStake()) {
         if (GetBlocksToMaturity() > 0)
             nGeneratedImmature = pwallet->GetCredit(*this);
         else
             nGeneratedMature = GetCredit();
-        return;
     }
 
     // Compute fee:
@@ -658,26 +657,35 @@ void CWalletTx::GetAmounts(int64& nGeneratedImmature, int64& nGeneratedMature, l
     }
 
     // Sent/received.
-    BOOST_FOREACH(const CTxOut& txout, vout)
-    {
-        CTxDestination address;
-        vector<unsigned char> vchPubKey;
-        if (!ExtractDestination(txout.scriptPubKey, address))
-        {
-            printf("CWalletTx::GetAmounts: Unknown transaction type found, txid %s\n",
-                   this->GetHash().ToString().c_str());
-        }
+    BOOST_FOREACH(const CTxOut &txout, vout) {
+                    bool fIsMine;
+                    // Only need to handle txouts if AT LEAST one of these is true:
+                    //   1) they debit from us (sent)
+                    //   2) the output is to us (received)
+                    if (nDebit > 0) {
+                        // Don't report 'change' txouts
+                        if (pwallet->IsChange(txout))
+                            continue;
+                        fIsMine = pwallet->IsMine(txout);
+                    } else if (!(fIsMine = pwallet->IsMine(txout)))
+                        continue;
 
-        // Don't report 'change' txouts
-        if (nDebit > 0 && pwallet->IsChange(txout))
-            continue;
+                    // In either case, we need to get the destination address
+                    CTxDestination address;
+                    if (!ExtractDestination(txout.scriptPubKey, address)) {
+                        printf("CWalletTx::GetAmounts: Unknown transaction type found, txid %s\n",
+                               this->GetHash().ToString().c_str());
+                        address = CNoDestination();
+                    }
 
-        if (nDebit > 0)
-            listSent.push_back(make_pair(address, txout.nValue));
+                    // If we are debited by the transaction, add the output as a "sent" entry
+                    if (nDebit > 0)
+                        listSent.push_back(make_pair(address, txout.nValue));
 
-        if (pwallet->IsMine(txout))
-            listReceived.push_back(make_pair(address, txout.nValue));
-    }
+                    // If we are receiving the output, add it as a "received" entry
+                    if (fIsMine)
+                        listReceived.push_back(make_pair(address, txout.nValue));
+                }
 
 }
 
