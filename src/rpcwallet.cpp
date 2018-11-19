@@ -1,5 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
+// Copyright (c) 2011-2018 The Peercoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -990,7 +991,24 @@ Value listreceivedbyaccount(const Array& params, bool fHelp)
     return ListReceived(params, true);
 }
 
-void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDepth, bool fLong, Array& ret)
+static void MaybePushAddress(Object &entry, const CTxDestination &dest)
+{
+    CBitcoinAddress addr;
+    if (addr.Set(dest))
+        entry.push_back(Pair("address", addr.ToString()));
+}
+
+static void PushCoinStakeCategory(Object &entry, const CWalletTx &wtx)
+{
+    if (wtx.GetDepthInMainChain() < 1)
+        entry.push_back(Pair("category", "stake-orphan"));
+    else if (wtx.GetBlocksToMaturity() > 0)
+        entry.push_back(Pair("category", "stake"));
+    else
+        entry.push_back(Pair("category", "stake-mint"));
+}
+
+void ListTransactions(const CWalletTx &wtx, const string &strAccount, int nMinDepth, bool fLong, Array &ret)
 {
     int64 nGeneratedImmature, nGeneratedMature, nFee;
     string strSentAccount;
@@ -1001,73 +1019,51 @@ void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDe
 
     bool fAllAccounts = (strAccount == string("*"));
 
-    // Generated blocks assigned to account ""
-//    if ((nGeneratedMature+nGeneratedImmature) != 0 && (fAllAccounts || strAccount == ""))
-//    {
-//        Object entry;
-//        entry.push_back(Pair("account", string("")));
-//        if (nGeneratedImmature)
-//        {
-//            entry.push_back(Pair("category", wtx.GetDepthInMainChain() ? "immature" : "orphan"));
-//            entry.push_back(Pair("amount", ValueFromAmount(nGeneratedImmature)));
-//        }
-//        else
-//        {
-//            entry.push_back(Pair("category", "generate"));
-//            entry.push_back(Pair("amount", ValueFromAmount(nGeneratedMature)));
-//        }
-//        if (fLong)
-//            WalletTxToJSON(wtx, entry);
-//        ret.push_back(entry);
-//    }
-
     // Sent
-    if ((!listSent.empty() || nFee != 0) && (fAllAccounts || strAccount == strSentAccount))
-    {
-        BOOST_FOREACH(const PAIRTYPE(CTxDestination, int64)& s, listSent)
-        {
-            Object entry;
-            entry.push_back(Pair("account", strSentAccount));
-            entry.push_back(Pair("address", CBitcoinAddress(s.first).ToString()));
-            entry.push_back(Pair("category", "send"));
-            entry.push_back(Pair("amount", ValueFromAmount(-s.second)));
-            entry.push_back(Pair("fee", ValueFromAmount(-nFee)));
-            if (fLong)
-                WalletTxToJSON(wtx, entry);
-            ret.push_back(entry);
-        }
+    if ((!listSent.empty() || nFee != 0) && (fAllAccounts || strAccount == strSentAccount)) {
+        BOOST_FOREACH(const PAIRTYPE(CTxDestination, int64)& s, listSent) {
+                        Object entry;
+                        entry.push_back(Pair("account", strSentAccount));
+                        MaybePushAddress(entry, s.first);
+                        if (wtx.IsCoinStake())
+                            PushCoinStakeCategory(entry, wtx);
+                        else
+                            entry.push_back(Pair("category", "send"));
+                        entry.push_back(Pair("amount", ValueFromAmount(-s.second)));
+                        entry.push_back(Pair("fee", ValueFromAmount(-nFee)));
+                        if (fLong)
+                            WalletTxToJSON(wtx, entry);
+                        ret.push_back(entry);
+                    }
     }
 
     // Received
-    if (listReceived.size() > 0 && wtx.GetDepthInMainChain() >= nMinDepth)
-    {
-        BOOST_FOREACH(const PAIRTYPE(CTxDestination, int64)& r, listReceived)
-        {
-            string account;
-            if (pwalletMain->mapAddressBook.count(r.first))
-                account = pwalletMain->mapAddressBook[r.first];
-            if (fAllAccounts || (account == strAccount))
-            {
-                Object entry;
-                entry.push_back(Pair("account", account));
-                entry.push_back(Pair("address", CBitcoinAddress(r.first).ToString()));
-                if (wtx.IsCoinBase())
-                {
-                    if (wtx.GetDepthInMainChain() < 1)
-                        entry.push_back(Pair("category", "orphan"));
-                    else if (wtx.GetBlocksToMaturity() > 0)
-                        entry.push_back(Pair("category", "immature"));
-                    else
-                        entry.push_back(Pair("category", "generate"));
-                }
-                else
-                    entry.push_back(Pair("category", "receive"));
-                entry.push_back(Pair("amount", ValueFromAmount(r.second)));
-                if (fLong)
-                    WalletTxToJSON(wtx, entry);
-                ret.push_back(entry);
-            }
-        }
+    if (!listReceived.empty() && wtx.GetDepthInMainChain() >= nMinDepth) {
+        BOOST_FOREACH(const PAIRTYPE(CTxDestination, int64)& r, listReceived) {
+                        string account;
+                        if (pwalletMain->mapAddressBook.count(r.first))
+                            account = pwalletMain->mapAddressBook[r.first];
+                        if (fAllAccounts || (account == strAccount)) {
+                            Object entry;
+                            entry.push_back(Pair("account", account));
+                            MaybePushAddress(entry, r.first);
+                            if (wtx.IsCoinBase()) {
+                                if (wtx.GetDepthInMainChain() < 1)
+                                    entry.push_back(Pair("category", "orphan"));
+                                else if (wtx.GetBlocksToMaturity() > 0)
+                                    entry.push_back(Pair("category", "immature"));
+                                else
+                                    entry.push_back(Pair("category", "generate"));
+                            } else if (wtx.IsCoinStake()) {
+                                PushCoinStakeCategory(entry, wtx);
+                            } else
+                                entry.push_back(Pair("category", "receive"));
+                            entry.push_back(Pair("amount", ValueFromAmount(r.second)));
+                            if (fLong)
+                                WalletTxToJSON(wtx, entry);
+                            ret.push_back(entry);
+                        }
+                    }
     }
 }
 
