@@ -78,7 +78,6 @@ OBJS= \
     obj/rpcblockchain.o \
     obj/rpcrawtransaction.o \
     obj/script.o \
-    obj/scrypt-arm.o \
     obj/sync.o \
     obj/util.o \
     obj/wallet.o \
@@ -87,8 +86,6 @@ OBJS= \
     obj/kernel.o \
     obj/pbkdf2.o \
     obj/scrypt_mine.o \
-    obj/scrypt-x86.o \
-    obj/scrypt-x86_64.o \
     obj/blake.o\
     obj/bmw.o\
     obj/groestl.o\
@@ -124,12 +121,6 @@ obj-test/%.o: test/%.cpp $(HEADERS)
 
 test_kumacoin.exe: $(TESTOBJS) $(filter-out obj/init.o,$(OBJS:obj/%=obj/%))
 	i586-mingw32msvc-g++ $(CFLAGS) $(LDFLAGS) -o $@ $(LIBPATHS) $^ -lboost_unit_test_framework-mt-s $(LIBS)
-
-obj/scrypt-x86.o: scrypt-x86.S
-	i586-mingw32msvc-g++ -c $(CFLAGS) -MMD -o $@ $<
-
-obj/scrypt-x86_64.o: scrypt-x86_64.S
-	i586-mingw32msvc-g++ -c $(CFLAGS) -MMD -o $@ $<
 
 clean:
 	-rm -f obj/*.o

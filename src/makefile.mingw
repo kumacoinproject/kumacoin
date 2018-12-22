@@ -9,11 +9,11 @@ INCLUDEPATHS= \
  -I"C:\boost_1_53_0" \
  -I"C:\db-4.8.30.NC\build_unix" \
  -I"C:\openssl-1.0.1e\include
- 
+
 LIBPATHS= \
  -L"C:\boost_1_53_0\stage/lib" \
  -L"C:\db-4.8.30.NC\build_unix" \
- -L"C:\openssl-1.0.1e" 
+ -L"C:\openssl-1.0.1e"
 
 LIBS= \
  -l boost_system-mgw45-mt-d-1_53 \
@@ -80,9 +80,7 @@ OBJS= \
     obj/noui.o \
     obj/kernel.o \
     obj/pbkdf2.o \
-    obj/scrypt_mine.o \
-    obj/scrypt-x86.o \
-    obj/scrypt-x86_64.o
+    obj/scrypt_mine.o
 
 all: kumacoind.exe
 
@@ -91,12 +89,6 @@ test check: test_kumacoin.exe FORCE
 
 obj/%.o: %.cpp $(HEADERS)
 	g++ -c $(CFLAGS) -o $@ $<
-
-obj/scrypt-x86.o: scrypt-x86.S
-	$(CXX) -c $(xCXXFLAGS) -MMD -o $@ $<
-
-obj/scrypt-x86_64.o: scrypt-x86_64.S
-	$(CXX) -c $(xCXXFLAGS) -MMD -o $@ $<
 
 kumacoind.exe: $(OBJS:obj/%=obj/%)
 	g++ $(CFLAGS) $(LDFLAGS) -o $@ $(LIBPATHS) $^ $(LIBS)
