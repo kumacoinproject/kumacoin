@@ -2065,7 +2065,7 @@ Address: %4
     <message>
         <location line="+1"/>
         <source>Label</source>
-        <translation>レーベル</translation>
+        <translation>ラベル</translation>
     </message>
     <message>
         <location line="+1"/>
