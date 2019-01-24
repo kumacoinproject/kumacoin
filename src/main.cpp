@@ -2538,6 +2538,11 @@ bool CBlock::AcceptBlock()
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
 
+    //If this is a reorg, check that it is not too deep
+    int nMaxReorgDepth = GetArg("-maxreorg", MAX_REORG_DEPTH);
+    if (pindexBest->nHeight - nHeight >= nMaxReorgDepth)
+        return DoS(1, error("AcceptBlock() : forked chain older than max reorganization depth (height %d)", nHeight));
+
     // Check proof-of-work or proof-of-stake
     if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
         return DoS(100, error("AcceptBlock() : incorrect %s", IsProofOfWork() ? "proof-of-work" : "proof-of-stake"));
