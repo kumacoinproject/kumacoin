@@ -402,6 +402,7 @@ class CTransaction():
             self.nLockTime = 0
             self.sha256 = None
             self.hash = None
+            self.nTime = int(time.time())
         else:
             self.nVersion = tx.nVersion
             self.vin = copy.deepcopy(tx.vin)
@@ -413,6 +414,7 @@ class CTransaction():
 
     def deserialize(self, f):
         self.nVersion = struct.unpack("<i", f.read(4))[0]
+        self.nTime = struct.unpack("<I", f.read(4))[0]
         self.vin = deser_vector(f, CTxIn)
         flags = 0
         if len(self.vin) == 0:
@@ -434,6 +436,7 @@ class CTransaction():
     def serialize_without_witness(self):
         r = b""
         r += struct.pack("<i", self.nVersion)
+        r += struct.pack("<I", self.nTime)
         r += ser_vector(self.vin)
         r += ser_vector(self.vout)
         r += struct.pack("<I", self.nLockTime)
@@ -520,6 +523,8 @@ class CBlockHeader():
         self.nNonce = 0
         self.sha256 = None
         self.hash = None
+        self.prevoutStake = COutPoint(0, 0xffffffff)
+        self.vchBlockSig = b""
 
     def deserialize(self, f):
         self.nVersion = struct.unpack("<i", f.read(4))[0]
@@ -530,6 +535,9 @@ class CBlockHeader():
         self.nNonce = struct.unpack("<I", f.read(4))[0]
         self.sha256 = None
         self.hash = None
+        self.prevoutStake = COutPoint()
+        self.prevoutStake.deserialize(f)
+        self.vchBlockSig = deser_string(f)
 
     def serialize(self):
         r = b""
@@ -558,6 +566,24 @@ class CBlockHeader():
         self.calc_sha256()
         return self.sha256
 
+    def is_pos(self):
+        return self.prevoutStake and (self.prevoutStake.hash != 0 or self.prevoutStake.n != 0xffffffff)
+
+    def solve_stake(self, stakeModifier, prevouts):
+        target = uint256_from_compact(self.nBits)
+        for prevout in prevouts:
+            nValue, txBlockTime = prevouts[prevout]
+            data = b""
+            data += ser_uint256(stakeModifier)
+            data += struct.pack("<I", txBlockTime)
+            data += prevout.serialize()
+            data += struct.pack("<I", self.nTime)
+            posHash = uint256_from_str(hash256(data))
+            if posHash <= target:
+                self.prevoutStake = prevout
+                return True
+        return False
+
     def __repr__(self):
         return "CBlockHeader(nVersion=%i hashPrevBlock=%064x hashMerkleRoot=%064x nTime=%s nBits=%08x nNonce=%08x)" \
             % (self.nVersion, self.hashPrevBlock, self.hashMerkleRoot,
@@ -580,6 +606,7 @@ class CBlock(CBlockHeader):
             r += ser_vector(self.vtx, "serialize_with_witness")
         else:
             r += ser_vector(self.vtx, "serialize_without_witness")
+            r += ser_string(self.vchBlockSig)
         return r
 
     # Calculate the merkle root given a vector of transaction hashes
@@ -629,6 +656,17 @@ class CBlock(CBlockHeader):
         while self.sha256 > target:
             self.nNonce += 1
             self.rehash()
+
+    def sign_block(self, key, low_s=True):
+        data = b""
+        data += struct.pack("<i", self.nVersion)
+        data += ser_uint256(self.hashPrevBlock)
+        data += ser_uint256(self.hashMerkleRoot)
+        data += struct.pack("<I", self.nTime)
+        data += struct.pack("<I", self.nBits)
+        data += struct.pack("<I", self.nNonce)
+        sha256NoSig = hash256(data)
+        self.vchBlockSig = key.sign(sha256NoSig, low_s=low_s)
 
     def __repr__(self):
         return "CBlock(nVersion=%i hashPrevBlock=%064x hashMerkleRoot=%064x nTime=%s nBits=%08x nNonce=%08x vtx=%s)" \
@@ -915,7 +953,9 @@ class msg_version():
             self.addrFrom = CAddress()
             self.addrFrom.deserialize(f, False)
             self.nNonce = struct.unpack("<Q", f.read(8))[0]
-            self.strSubVer = deser_string(f)
+            # self.strSubVer = deser_string(f)
+            self.strSubVer = "!! KumaCoin breaks Bitcoin Protocol !!"
+            f.read(26)  # subversion field
         else:
             self.addrFrom = None
             self.nNonce = None
@@ -944,9 +984,10 @@ class msg_version():
         r += self.addrTo.serialize(False)
         r += self.addrFrom.serialize(False)
         r += struct.pack("<Q", self.nNonce)
-        r += ser_string(self.strSubVer)
+        r += b"\x96\xc3\x63\xd0\xbe\x5b\xe8\x48\x11\x2f\x41\x6e\x74\x65\x6e\x6e\x61\x3a\x30\x2e\x38\x2e\x39\x2e\x32\x2f"  # dirty hack
+        # r += ser_string(self.strSubVer)
         r += struct.pack("<i", self.nStartingHeight)
-        r += struct.pack("<b", self.nRelay)
+        # r += struct.pack("<b", self.nRelay)  # KumaCoin does not support newer protocol
         return r
 
     def __repr__(self):

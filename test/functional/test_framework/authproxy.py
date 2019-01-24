@@ -128,7 +128,7 @@ class AuthServiceProxy():
             raise ValueError('Cannot handle both named and positional arguments')
         return {'version': '1.1',
                 'method': self._service_name,
-                'params': args or argsn,
+                'params': list(args or argsn),  # KumaCoin does not support dict
                 'id': AuthServiceProxy.__id_count}
 
     def __call__(self, *args, **argsn):
