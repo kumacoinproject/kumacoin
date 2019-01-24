@@ -87,6 +87,8 @@ extern std::set<CWallet*> setpwalletRegistered;
 extern unsigned char pchMessageStart[4];
 extern std::map<uint256, CBlock*> mapOrphanBlocks;
 
+static const int64 MAX_REORG_DEPTH = 100;
+
 extern bool bRemotePaymentsEnabled;
 extern bool bOPReturnEnabled;
 extern bool bOptionPaymentsEnabled;

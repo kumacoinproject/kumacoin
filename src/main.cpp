@@ -1,5 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
+// Copyright (c) 2015-2019 The Pivx developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -2492,6 +2493,35 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
     return true;
 }
 
+bool CheckTxIn(const CTxIn& in, bool& fAvailable, int& nSpentBlockHeight) {
+    CTxDB txdb("r");
+
+    fAvailable = true;
+    nSpentBlockHeight = -1;
+
+    CTxIndex parentTxIndex;
+    if (!txdb.ReadTxIndex(in.prevout.hash, parentTxIndex))
+        return error("CheckTxIn() : can't read parent tx index");
+
+    if (in.prevout.n >= parentTxIndex.vSpent.size())
+        return error("CheckTxIn() : FIXME invalid tx?");
+
+    CDiskTxPos posChildTx = parentTxIndex.vSpent[in.prevout.n];
+    if (!posChildTx.IsNull()) { // TX has already been spent on main chain
+        CTransaction childTx;
+        if (!childTx.ReadFromDisk(posChildTx))
+            return error("CheckTxIn() : can't read child tx");
+
+        CTxIndex childTxIndex;
+        if (!txdb.ReadTxIndex(childTx.GetHash(), childTxIndex))
+            return error("CheckTxIn() : can't read child tx index");
+
+        fAvailable = false;
+        nSpentBlockHeight = childTxIndex.GetDepthInMainChain();
+    }
+
+    return true;
+}
 
 bool CBlock::AcceptBlock()
 {
@@ -2545,6 +2575,90 @@ bool CBlock::AcceptBlock()
     CScript expect = CScript() << nHeight;
     if (!std::equal(expect.begin(), expect.end(), vtx[0].vin[0].scriptSig.begin()))
         return DoS(100, error("AcceptBlock() : block height mismatch in coinbase"));
+
+
+    if (IsProofOfStake() && !IsInitialBlockDownload()) {
+        LOCK(cs_main);
+        int splitHeight = -1;
+
+        // FIXME: heavy workaround
+        set<uint256> setMainChainBlockHash;
+        CBlockIndex* pprev = pindexBest;
+        while (pprev != nullptr && pindexBest->nHeight - pprev->nHeight >= nMaxReorgDepth) {
+            setMainChainBlockHash.insert(pprev->GetBlockHash());
+            pprev = pprev->pprev;
+        }
+
+        const bool isBlockFromFork = pindexPrev != nullptr && !setMainChainBlockHash.count(pindexPrev->GetBlockHash());
+        CTransaction &stakeTxIn = vtx[1];
+
+        // Check whether is a fork or not
+        if (isBlockFromFork) {
+
+            // Start at the block we're adding on to
+            CBlockIndex *prev = pindexPrev;
+
+            // Inputs
+            std::vector<CTxIn> kumaInputs;
+
+            for (const CTxIn &stakeIn : stakeTxIn.vin) {
+                kumaInputs.push_back(stakeIn);
+            }
+            const bool hasKumaInputs = !kumaInputs.empty();
+
+            CBlock bl;
+            // Go backwards on the forked chain up to the split
+            do {
+                if (!bl.ReadFromDisk(prev))
+                    // Previous block not on disk
+                    return error("%s: previous block %s not on disk", __func__, prev->GetBlockHash().GetHex().c_str());
+
+                // Loop through every input from said block
+                for (const CTransaction &t : bl.vtx) {
+                    for (const CTxIn &in: t.vin) {
+                        // Loop through every input of the staking tx
+                        for (const CTxIn &stakeIn : kumaInputs) {
+                            // if it's already spent
+
+                            // regular staking check
+                            if (hasKumaInputs) {
+                                if (stakeIn.prevout == in.prevout) {
+                                    return DoS(100, error("%s: input already spent on a previous block", __func__));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                prev = prev->pprev;
+
+            } while (!setMainChainBlockHash.count(prev->GetBlockHash()));
+
+            // Split height
+            splitHeight = prev->nHeight;
+        }
+
+        // If the stake is not a zPoS then let's check if the inputs were spent on the main chain
+        for (CTxIn in: stakeTxIn.vin) {
+
+            int nSpentBlockHeiht;
+            bool fAvailable;
+            bool coin = CheckTxIn(in, fAvailable, nSpentBlockHeiht);
+
+            if(!coin && !isBlockFromFork){
+                // No coins on the main chain
+                return error("%s: coin stake inputs not available on main chain", __func__);
+            }
+            if(coin && !fAvailable){
+                // If this is not available get the height of the spent and validate it with the forked height
+                // Check if this occurred before the chain split
+                if(!(isBlockFromFork && nSpentBlockHeiht > splitHeight)){
+                    // Coins not available
+                    return error("%s: coin stake inputs already spent in main chain", __func__);
+                }
+            }
+        }
+    }
 
     // Write block to history file
     if (!CheckDiskSpace(::GetSerializeSize(*this, SER_DISK, CLIENT_VERSION)))
@@ -2698,8 +2812,26 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     }
 
     // Store to disk
-    if (!pblock->AcceptBlock())
+    if (!pblock->AcceptBlock()) {
+        // Get prev block index
+        map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(pblock->hashPrevBlock);
+        CBlockIndex* pindexPrev = (*mi).second;
+        int nHeight = pindexPrev->nHeight+1;
+
+        // Check spamming
+        if(pfrom && GetBoolArg("-blockspamfilter", true)) {
+            pfrom->nodeBlocks.onBlockReceived(nHeight);
+            bool nodeStatus = true;
+            // UpdateState will return false if the node is attacking us or update the score and return true.
+            nodeStatus = pfrom->nodeBlocks.updateState();
+            if (!nodeStatus) {
+                pfrom->Misbehaving(100);
+                return error("ProcessBlock() : AcceptBlock FAILED - block spam protection");
+            }
+
+        }
         return error("ProcessBlock() : AcceptBlock FAILED");
+    }
 
     // Recursively process any orphan blocks that depended on this one
     vector<uint256> vWorkQueue;
