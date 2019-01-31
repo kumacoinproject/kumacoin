@@ -1,0 +1,107 @@
+diff --git a/src/kernel.cpp b/src/kernel.cpp
+index abe3ab9..6f56a19 100644
+--- a/src/kernel.cpp
++++ b/src/kernel.cpp
+@@ -283,2 +283,4 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock& blockFrom, unsigned
+ {
++    return true;
++
+     if (nTimeTx < txPrev.nTime)  // Transaction timestamp violation
+diff --git a/src/main.cpp b/src/main.cpp
+index 200d027..3c0551b 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -41,4 +41,4 @@ static CBigNum bnProofOfStakeLimit(~uint256(0) >> 16);
+ 
+-static CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 2);
+-static CBigNum bnProofOfStakeLimitTestNet(~uint256(0) >> 16);
++static CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 1);
++static CBigNum bnProofOfStakeLimitTestNet(~uint256(0) >> 1);
+ 
+@@ -565,5 +565,5 @@ bool CTransaction::CheckTransaction() const
+ 
+-        // ppcoin: enforce minimum output amount
+-        if ((!txout.IsEmpty()) && txout.nValue < MIN_TXOUT_AMOUNT && txout.scriptPubKey[0] != OP_RETURN )
+-            return DoS(100, error("CTransaction::CheckTransaction() : txout.nValue below minimum"));
++//        // ppcoin: enforce minimum output amount
++//        if ((!txout.IsEmpty()) && txout.nValue < MIN_TXOUT_AMOUNT && txout.scriptPubKey[0] != OP_RETURN )
++//            return DoS(100, error("CTransaction::CheckTransaction() : txout.nValue below minimum"));
+ 
+@@ -1095,4 +1095,10 @@ unsigned int ComputeMaxBits(CBigNum bnTargetLimit, unsigned int nBase, int64 nTi
+     CBigNum bnResult;
++    std::cout << "================= ComputeMaxBits =================" << std::endl;
++    std::cout << "bnTargetLimit: " << bnTargetLimit.ToString() << std::endl;
++    std::cout << "nBase: " << nBase << std::endl;
++    std::cout << "nTime: " << nTime << std::endl;
+     bnResult.SetCompact(nBase);
++    std::cout << "bnResult: " << bnResult.ToString() << std::endl;
+     bnResult *= 2;
++    std::cout << "bnResult: " << bnResult.ToString() << std::endl;
+     while (nTime > 0 && bnResult < bnTargetLimit)
+@@ -1102,5 +1108,9 @@ unsigned int ComputeMaxBits(CBigNum bnTargetLimit, unsigned int nBase, int64 nTi
+         nTime -= 24 * 60 * 60;
++        std::cout << "> bnResult: " << bnResult.ToString() << std::endl;
++        std::cout << "> nTime: " << nTime << std::endl;
+     }
++    std::cout << "bnResult: before limit " << bnResult.ToString() << std::endl;
+     if (bnResult > bnTargetLimit)
+         bnResult = bnTargetLimit;
++    std::cout << "bnResult: after limit " << bnResult.ToString() << std::endl;
+     return bnResult.GetCompact();
+@@ -1479,2 +1489,6 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
+ {
++    CBigNum bnNew;
++    bnNew.SetCompact(0x207fffff);
++    return bnNew.GetCompact();
++
+     int nHeight = pindexLast->nHeight + 1;
+@@ -1490,2 +1504,4 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits)
+ {
++    return true;
++
+     CBigNum bnTarget;
+@@ -2533,4 +2549,4 @@ bool CBlock::AcceptBlock()
+     // Check timestamp against prev
+-    if (GetBlockTime() <= pindexPrev->GetMedianTimePast() || GetBlockTime() + nMaxClockDrift < pindexPrev->GetBlockTime())
+-        return error("AcceptBlock() : block's timestamp is too early");
++//    if (GetBlockTime() <= pindexPrev->GetMedianTimePast() || GetBlockTime() + nMaxClockDrift < pindexPrev->GetBlockTime())
++//        return error("AcceptBlock() : block's timestamp is too early");
+ 
+@@ -2725,2 +2741,4 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
+ 
++        std::cout << bnNewBlock.ToString() << std::endl << bnRequired.ToString() << std::endl;
++
+         if (bnNewBlock > bnRequired)
+@@ -2861,2 +2879,6 @@ bool CBlock::CheckBlockSignature() const
+ {
++    if (fTestNet) {
++        return true;
++    }
++
+     if (GetHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
+@@ -2993,7 +3015,7 @@ bool LoadBlockIndex(bool fAllowNew)
+         bnProofOfWorkLimit = bnProofOfWorkLimitTestNet; // 0x0000ffff PoW base target is fixed in testnet
+-        nStakeMinAge = 20 * 60; // test net min age is 20 min
+-        nStakeMaxAge = 60 * 60; // test net min age is 60 min
+-        nModifierInterval = 60; // test modifier interval is 1 minutes
+-        nCoinbaseMaturity = 10; // test maturity is 10 blocks
+-        nStakeTargetSpacing = 3 * 60; // test block spacing is 3 minutes
++        nStakeMinAge = 1; // test net min age is 20 min
++        nStakeMaxAge = 60 * 60 * 60; // test net min age is 60 min
++        nModifierInterval = 2; // test modifier interval is 1 minutes
++        nCoinbaseMaturity = 1; // test maturity is 10 blocks
++        nStakeTargetSpacing = 2; // test block spacing is 3 minutes
+     }
+@@ -3059,2 +3081,3 @@ bool LoadBlockIndex(bool fAllowNew)
+ 
++        hashGenesisBlockTestNet = block.GetHash();
+ 
+diff --git a/src/main.h b/src/main.h
+index acb8869..8ac583b 100644
+--- a/src/main.h
++++ b/src/main.h
+@@ -58,3 +58,3 @@ static const int fHaveUPnP = false;
+ static const uint256 hashGenesisBlockOfficial("0x01c24a841f8d349b777687e2aa6718c24050e357e7d78b25de88b8a1ee569ac5");
+-static const uint256 hashGenesisBlockTestNet ("0x25b68b2e1b99ba19d8180a477004d052187b1b8fc3af3ebd5101049aa7b61319");
++static uint256 hashGenesisBlockTestNet ("0x25b68b2e1b99ba19d8180a477004d052187b1b8fc3af3ebd5101049aa7b61319");
+ 

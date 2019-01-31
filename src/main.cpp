@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
+// Copyright (c) 2011-2019 The Peercoin developers
+// Copyright (c) 2015-2019 The Pivx developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -2492,6 +2494,35 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
     return true;
 }
 
+bool CheckTxIn(const CTxIn& in, bool& fAvailable, int& nSpentBlockHeight) {
+    CTxDB txdb("r");
+
+    fAvailable = true;
+    nSpentBlockHeight = -1;
+
+    CTxIndex parentTxIndex;
+    if (!txdb.ReadTxIndex(in.prevout.hash, parentTxIndex))
+        return error("CheckTxIn() : can't read parent tx index");
+
+    if (in.prevout.n >= parentTxIndex.vSpent.size())
+        return error("CheckTxIn() : FIXME invalid tx?");
+
+    CDiskTxPos posChildTx = parentTxIndex.vSpent[in.prevout.n];
+    if (!posChildTx.IsNull()) { // TX has already been spent on main chain
+        CTransaction childTx;
+        if (!childTx.ReadFromDisk(posChildTx))
+            return error("CheckTxIn() : can't read child tx");
+
+        CTxIndex childTxIndex;
+        if (!txdb.ReadTxIndex(childTx.GetHash(), childTxIndex))
+            return error("CheckTxIn() : can't read child tx index");
+
+        fAvailable = false;
+        nSpentBlockHeight = childTxIndex.GetDepthInMainChain();
+    }
+
+    return true;
+}
 
 bool CBlock::AcceptBlock()
 {
@@ -2506,6 +2537,11 @@ bool CBlock::AcceptBlock()
         return DoS(10, error("AcceptBlock() : prev block not found"));
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
+
+    //If this is a reorg, check that it is not too deep
+    int nMaxReorgDepth = GetArg("-maxreorg", MAX_REORG_DEPTH);
+    if (pindexBest->nHeight - nHeight >= nMaxReorgDepth)
+        return DoS(1, error("AcceptBlock() : forked chain older than max reorganization depth (height %d)", nHeight));
 
     // Check proof-of-work or proof-of-stake
     if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
@@ -2545,6 +2581,90 @@ bool CBlock::AcceptBlock()
     CScript expect = CScript() << nHeight;
     if (!std::equal(expect.begin(), expect.end(), vtx[0].vin[0].scriptSig.begin()))
         return DoS(100, error("AcceptBlock() : block height mismatch in coinbase"));
+
+
+    if (IsProofOfStake() && !IsInitialBlockDownload()) {
+        LOCK(cs_main);
+        int splitHeight = -1;
+
+        // FIXME: heavy workaround
+        set<uint256> setMainChainBlockHash;
+        CBlockIndex* pprev = pindexBest;
+        while (pprev != nullptr && pindexBest->nHeight - pprev->nHeight >= nMaxReorgDepth) {
+            setMainChainBlockHash.insert(pprev->GetBlockHash());
+            pprev = pprev->pprev;
+        }
+
+        const bool isBlockFromFork = pindexPrev != nullptr && !setMainChainBlockHash.count(pindexPrev->GetBlockHash());
+        CTransaction &stakeTxIn = vtx[1];
+
+        // Check whether is a fork or not
+        if (isBlockFromFork) {
+
+            // Start at the block we're adding on to
+            CBlockIndex *prev = pindexPrev;
+
+            // Inputs
+            std::vector<CTxIn> kumaInputs;
+
+            for (const CTxIn &stakeIn : stakeTxIn.vin) {
+                kumaInputs.push_back(stakeIn);
+            }
+            const bool hasKumaInputs = !kumaInputs.empty();
+
+            CBlock bl;
+            // Go backwards on the forked chain up to the split
+            do {
+                if (!bl.ReadFromDisk(prev))
+                    // Previous block not on disk
+                    return error("%s: previous block %s not on disk", __func__, prev->GetBlockHash().GetHex().c_str());
+
+                // Loop through every input from said block
+                for (const CTransaction &t : bl.vtx) {
+                    for (const CTxIn &in: t.vin) {
+                        // Loop through every input of the staking tx
+                        for (const CTxIn &stakeIn : kumaInputs) {
+                            // if it's already spent
+
+                            // regular staking check
+                            if (hasKumaInputs) {
+                                if (stakeIn.prevout == in.prevout) {
+                                    return DoS(100, error("%s: input already spent on a previous block", __func__));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                prev = prev->pprev;
+
+            } while (!setMainChainBlockHash.count(prev->GetBlockHash()));
+
+            // Split height
+            splitHeight = prev->nHeight;
+        }
+
+        // If the stake is not a zPoS then let's check if the inputs were spent on the main chain
+        for (CTxIn in: stakeTxIn.vin) {
+
+            int nSpentBlockHeiht;
+            bool fAvailable;
+            bool coin = CheckTxIn(in, fAvailable, nSpentBlockHeiht);
+
+            if(!coin && !isBlockFromFork){
+                // No coins on the main chain
+                return error("%s: coin stake inputs not available on main chain", __func__);
+            }
+            if(coin && !fAvailable){
+                // If this is not available get the height of the spent and validate it with the forked height
+                // Check if this occurred before the chain split
+                if(!(isBlockFromFork && nSpentBlockHeiht > splitHeight)){
+                    // Coins not available
+                    return error("%s: coin stake inputs already spent in main chain", __func__);
+                }
+            }
+        }
+    }
 
     // Write block to history file
     if (!CheckDiskSpace(::GetSerializeSize(*this, SER_DISK, CLIENT_VERSION)))
@@ -2605,6 +2725,30 @@ bool CBlockIndex::IsSuperMajority(int minVersion, const CBlockIndex* pstart, uns
     return (nFound >= nRequired);
 }
 
+// Remove a random orphan block (which does not have any dependent orphans).
+void static PruneOrphanBlocks()
+{
+    if (mapOrphanBlocksByPrev.size() <= (size_t) std::max((int64)0, GetArg("-maxorphanblocks", MAX_ORPHAN_BLOCKS)))
+        return;
+
+    // Pick a random orphan block.
+    int pos = insecure_rand() % mapOrphanBlocksByPrev.size();
+    std::multimap<uint256, CBlock*>::iterator it = mapOrphanBlocksByPrev.begin();
+    while (pos--) it++;
+
+    // As long as this block has other orphans depending on it, move to one of those successors.
+    do {
+        std::multimap<uint256, CBlock*>::iterator it2 = mapOrphanBlocksByPrev.find(it->second->GetHash());
+        if (it2 == mapOrphanBlocksByPrev.end())
+            break;
+        it = it2;
+    } while(1);
+
+    uint256 hash = it->second->GetHash();
+    delete it->second;
+    mapOrphanBlocksByPrev.erase(it);
+    mapOrphanBlocks.erase(hash);
+}
 
 bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 {
@@ -2667,27 +2811,33 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     if (!IsInitialBlockDownload())
         Checkpoints::AskForPendingSyncCheckpoint(pfrom);
 
-    // If don't already have its previous block, shunt it off to holding area until we get it
-    if (!mapBlockIndex.count(pblock->hashPrevBlock))
-    {
-        printf("ProcessBlock: ORPHAN BLOCK, prev=%s\n", pblock->hashPrevBlock.ToString().substr(0,20).c_str());
-        CBlock* pblock2 = new CBlock(*pblock);
-        // ppcoin: check proof-of-stake
-        if (pblock2->IsProofOfStake())
-        {
-            // Limited duplicity on stake: prevents block flood attack
-            // Duplicate stake allowed only when there is orphan child block
-            if (setStakeSeenOrphan.count(pblock2->GetProofOfStake()) && !mapOrphanBlocksByPrev.count(hash) && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
-                return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for orphan block %s", pblock2->GetProofOfStake().first.ToString().c_str(), pblock2->GetProofOfStake().second, hash.ToString().c_str());
-            else
-                setStakeSeenOrphan.insert(pblock2->GetProofOfStake());
-        }
-        mapOrphanBlocks.insert(make_pair(hash, pblock2));
-        mapOrphanBlocksByPrev.insert(make_pair(pblock2->hashPrevBlock, pblock2));
+    // If we don't already have its previous block, shunt it off to holding area until we get it
+    if (pblock->hashPrevBlock != 0 && !mapBlockIndex.count(pblock->hashPrevBlock)) {
+        printf("ProcessBlock: ORPHAN BLOCK, prev=%s\n", pblock->hashPrevBlock.ToString().c_str());
 
-        // Ask this guy to fill in what we're missing
-        if (pfrom)
-        {
+        // Accept orphans as long as there is a node to request its parents from
+        if (pfrom) {
+            PruneOrphanBlocks();
+            CBlock *pblock2 = new CBlock(*pblock);
+            // ppcoin: check proof-of-stake
+            if (pblock2->IsProofOfStake()) {
+                // Limited duplicity on stake: prevents block flood attack
+                // Duplicate stake allowed only when there is orphan child block
+                if (setStakeSeenOrphan.count(pblock2->GetProofOfStake()) && !mapOrphanBlocksByPrev.count(hash) &&
+                    !Checkpoints::WantedByPendingSyncCheckpoint(hash)) {
+                    error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for orphan block %s",
+                          pblock2->GetProofOfStake().first.ToString().c_str(), pblock2->GetProofOfStake().second,
+                          hash.ToString().c_str());
+                    //pblock2 will not be needed, free it
+                    delete pblock2;
+                    return false;
+                } else
+                    setStakeSeenOrphan.insert(pblock2->GetProofOfStake());
+            }
+            mapOrphanBlocks.insert(make_pair(hash, pblock2));
+            mapOrphanBlocksByPrev.insert(make_pair(pblock2->hashPrevBlock, pblock2));
+
+            // Ask this guy to fill in what we're missing
             pfrom->PushGetBlocks(pindexBest, GetOrphanRoot(pblock2));
             // ppcoin: getblocks may not obtain the ancestor block rejected
             // earlier by duplicate-stake check so we ask for it again directly
@@ -2698,8 +2848,26 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     }
 
     // Store to disk
-    if (!pblock->AcceptBlock())
+    if (!pblock->AcceptBlock()) {
+        // Get prev block index
+        map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(pblock->hashPrevBlock);
+        CBlockIndex* pindexPrev = (*mi).second;
+        int nHeight = pindexPrev->nHeight+1;
+
+        // Check spamming
+        if(pfrom && GetBoolArg("-blockspamfilter", true)) {
+            pfrom->nodeBlocks.onBlockReceived(nHeight);
+            bool nodeStatus = true;
+            // UpdateState will return false if the node is attacking us or update the score and return true.
+            nodeStatus = pfrom->nodeBlocks.updateState();
+            if (!nodeStatus) {
+                pfrom->Misbehaving(100);
+                return error("ProcessBlock() : AcceptBlock FAILED - block spam protection");
+            }
+
+        }
         return error("ProcessBlock() : AcceptBlock FAILED");
+    }
 
     // Recursively process any orphan blocks that depended on this one
     vector<uint256> vWorkQueue;

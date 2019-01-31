@@ -1,5 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
+// Copyright (c) 2011-2019 The Peercoin developers
+// Copyright (c) 2015-2019 The Pivx developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "db.h"
@@ -299,7 +301,14 @@ std::string HelpMessage()
         "  -rpcssl                                  " + _("Use OpenSSL (https) for JSON-RPC connections") + "\n" +
         "  -rpcsslcertificatechainfile=<file.cert>  " + _("Server certificate file (default: server.cert)") + "\n" +
         "  -rpcsslprivatekeyfile=<file.pem>         " + _("Server private key (default: server.pem)") + "\n" +
-        "  -rpcsslciphers=<ciphers>                 " + _("Acceptable ciphers (default: TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH)") + "\n";
+        "  -rpcsslciphers=<ciphers>                 " + _("Acceptable ciphers (default: TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH)") + "\n" +
+
+        "\nDoS protection options:\n" +
+        "  -maxorphanblocks=<n>         " + _("Keep at most <n> unconnectable blocks in memory (default: 750)") + "\n" +
+        "  -maxreorg=<n>                " + _("Maximum reorganization depth (default: 100)") + "\n" +
+        "  -blockspamfilter             " + _("Use block spam filter (default: true)") + "\n" +
+        "  -blockspamfiltermaxsize=<n>  " + _("Maximum size of the list of indexes in the block spam filter (default: 50)") + "\n" +
+        "  -blockspamfiltermaxavg=<n>   " + _("Maximum average size of an index occurrence in the block spam filter (default: 10)") + "\n";
 
     return strUsage;
 }
@@ -350,6 +359,8 @@ bool AppInit2()
     sa_hup.sa_flags = 0;
     sigaction(SIGHUP, &sa_hup, NULL);
 #endif
+
+    seed_insecure_rand();
 
     // ********************************************************* Step 2: parameter interactions
 
