@@ -2636,12 +2636,12 @@ bool CBlock::AcceptBlock()
                     }
                 }
 
+                // Split height
+                splitHeight = prev->nHeight - 1;
+
                 prev = prev->pprev;
 
-            } while (!setMainChainBlockHash.count(prev->GetBlockHash()));
-
-            // Split height
-            splitHeight = prev->nHeight;
+            } while (prev != nullptr && !setMainChainBlockHash.count(prev->GetBlockHash()));
         }
 
         // If the stake is not a zPoS then let's check if the inputs were spent on the main chain
