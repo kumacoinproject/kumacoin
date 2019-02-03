@@ -2591,7 +2591,7 @@ bool CBlock::AcceptBlock()
         // FIXME: heavy workaround
         set<uint256> setMainChainBlockHash;
         CBlockIndex* pprev = pindexBest;
-        while (pprev != nullptr && pindexBest->nHeight - pprev->nHeight >= nMaxReorgDepth) {
+        while (pprev != nullptr && pindexBest->nHeight - pprev->nHeight < nMaxReorgDepth) {
             setMainChainBlockHash.insert(pprev->GetBlockHash());
             pprev = pprev->pprev;
         }
