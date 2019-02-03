@@ -2561,17 +2561,18 @@ bool CBlock::AcceptBlock()
         return DoS(100, error("AcceptBlock() : rejected by hardened checkpoint lock-in at %d", nHeight));
 
     // ppcoin: check that the block satisfies synchronized checkpoint
-    if (!Checkpoints::CheckSync(hash, pindexPrev))
-    {
-        if(!GetBoolArg("-nosynccheckpoints", false))
-        {
-            return error("AcceptBlock() : rejected by synchronized checkpoint");
-        }
-        else
-        {
-            strMiscWarning = _("WARNING: syncronized checkpoint violation detected, but skipped!");
-        }
-    }
+// KUMA: KumaCoin does not use synchronized checkpoint
+//    if (!Checkpoints::CheckSync(hash, pindexPrev))
+//    {
+//        if(!GetBoolArg("-nosynccheckpoints", false))
+//        {
+//            return error("AcceptBlock() : rejected by synchronized checkpoint");
+//        }
+//        else
+//        {
+//            strMiscWarning = _("WARNING: syncronized checkpoint violation detected, but skipped!");
+//        }
+//    }
 
     // Reject block.nVersion < 3 blocks since 95% threshold on mainNet and always on testNet:
     if (nVersion < 3 && ((!fTestNet && nHeight > 14060) || (fTestNet && nHeight > 0)))
@@ -2636,12 +2637,12 @@ bool CBlock::AcceptBlock()
                     }
                 }
 
+                // Split height
+                splitHeight = prev->nHeight - 1;
+
                 prev = prev->pprev;
 
-            } while (!setMainChainBlockHash.count(prev->GetBlockHash()));
-
-            // Split height
-            splitHeight = prev->nHeight;
+            } while (prev != nullptr && !setMainChainBlockHash.count(prev->GetBlockHash()));
         }
 
         // If the stake is not a zPoS then let's check if the inputs were spent on the main chain
