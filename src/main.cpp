@@ -2590,7 +2590,7 @@ bool CBlock::AcceptBlock()
 
         // FIXME: heavy workaround
         set<uint256> setMainChainBlockHash;
-        CBlockIndex* pprev = pindexBest;
+        CBlockIndex *pprev = pindexBest;
         while (pprev != nullptr && pindexBest->nHeight - pprev->nHeight < nMaxReorgDepth) {
             setMainChainBlockHash.insert(pprev->GetBlockHash());
             pprev = pprev->pprev;
@@ -2613,12 +2613,21 @@ bool CBlock::AcceptBlock()
             }
             const bool hasKumaInputs = !kumaInputs.empty();
 
+            int readBlock = 0;
             CBlock bl;
             // Go backwards on the forked chain up to the split
             do {
+                if (readBlock == nMaxReorgDepth) {
+                    // TODO: Remove this chain from disk.
+                    return error("%s: forked chain longer than maximum reorg limit", __func__);
+                }
+
                 if (!bl.ReadFromDisk(prev))
                     // Previous block not on disk
                     return error("%s: previous block %s not on disk", __func__, prev->GetBlockHash().GetHex().c_str());
+
+                // Increase amount of read blocks
+                readBlock++;
 
                 // Loop through every input from said block
                 for (const CTransaction &t : bl.vtx) {
@@ -2645,23 +2654,23 @@ bool CBlock::AcceptBlock()
             } while (prev != nullptr && !setMainChainBlockHash.count(prev->GetBlockHash()));
         }
 
-        // If the stake is not a zPoS then let's check if the inputs were spent on the main chain
+        // check if the inputs were spent on the main chain
         for (CTxIn in: stakeTxIn.vin) {
 
             int nSpentBlockHeiht;
             bool fAvailable;
             bool coin = CheckTxIn(in, fAvailable, nSpentBlockHeiht);
 
-            if(!coin && !isBlockFromFork){
+            if (!coin && !isBlockFromFork) {
                 // No coins on the main chain
-                return error("%s: coin stake inputs not available on main chain", __func__);
+                return error("%s: coin stake inputs not available on main chain, received height %d vs current %d", __func__, nHeight, pindexBest->nHeight);
             }
-            if(coin && !fAvailable){
+            if (coin && !fAvailable) {
                 // If this is not available get the height of the spent and validate it with the forked height
                 // Check if this occurred before the chain split
-                if(!(isBlockFromFork && nSpentBlockHeiht > splitHeight)){
+                if (!(isBlockFromFork && nSpentBlockHeiht > splitHeight)) {
                     // Coins not available
-                    return error("%s: coin stake inputs already spent in main chain", __func__);
+                    return error("%s: coin stake inputs already spent in main chain, received height %d vs spent %d", __func__, nHeight, nSpentBlockHeiht);
                 }
             }
         }
