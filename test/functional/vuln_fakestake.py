@@ -244,7 +244,7 @@ class FakeStakeTest(BitcoinTestFramework):
 
         block_count = 0
         print("Mining blocks..\n")
-        while block_count <= 50:
+        while block_count <= 100:
             block_count = self.node.getblockcount()
             print('Mined BlockCount:', block_count, "blocks")
             time.sleep(1)
@@ -272,7 +272,7 @@ class FakeStakeTest(BitcoinTestFramework):
 
         print("\n\nInitial size of data dir")
         print_dir_size(self.node.datadir + '/testnet2/blk0001.dat')
-        MAX_BLOCKS = 1000
+        MAX_BLOCKS = 50
         for i in range(0, MAX_BLOCKS):
             if i % 5 == 0:
                 print("Sent ", i, "blocks out of", MAX_BLOCKS)
