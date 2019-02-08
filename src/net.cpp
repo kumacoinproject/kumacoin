@@ -1156,9 +1156,11 @@ static const char *strDNSSeed[][2] = {
     {"LApool", "kumacoin.seed.lapool.me"},
     {"guest0", "108.61.183.37"},
     {"guest1", "123.217.155.249"},
-    {"guest2", "126.26.160.16"},
-    {"guest3", "133.232.254.47"},
-    {"guest4", "218.221.191.114"},
+    {"guest2", "79.137.57.54"},
+    {"guest3", "45.77.179.32"},
+    {"guest4", "203.152.216.75"},
+    {"guest5", "203.152.216.76"},
+    {"guest6", "203.152.216.77"},
 };
 
 void ThreadDNSAddressSeed(void* parg)
