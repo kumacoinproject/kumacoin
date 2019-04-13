@@ -2518,7 +2518,7 @@ bool CheckTxIn(const CTxIn& in, bool& fAvailable, int& nSpentBlockHeight) {
             return error("CheckTxIn() : can't read child tx index");
 
         fAvailable = false;
-        nSpentBlockHeight = childTxIndex.GetDepthInMainChain();
+        nSpentBlockHeight = nBestHeight - childTxIndex.GetDepthInMainChain() - 1;
     }
 
     return true;
