@@ -2494,11 +2494,12 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot) const
     return true;
 }
 
-bool CheckTxIn(const CTxIn& in, bool& fAvailable, int& nSpentBlockHeight) {
+bool CheckTxIn(const CTxIn& in, bool& fAvailable, int& nSpentBlockHeight, bool& fStakeInput) {
     CTxDB txdb("r");
 
     fAvailable = true;
     nSpentBlockHeight = -1;
+    fStakeInput = false;
 
     CTxIndex parentTxIndex;
     if (!txdb.ReadTxIndex(in.prevout.hash, parentTxIndex))
@@ -2519,6 +2520,7 @@ bool CheckTxIn(const CTxIn& in, bool& fAvailable, int& nSpentBlockHeight) {
 
         fAvailable = false;
         nSpentBlockHeight = nBestHeight - childTxIndex.GetDepthInMainChain() - 1;
+        fStakeInput = childTx.IsCoinStake();
     }
 
     return true;
@@ -2655,23 +2657,28 @@ bool CBlock::AcceptBlock()
         }
 
         // check if the inputs were spent on the main chain
-        for (CTxIn in: stakeTxIn.vin) {
+        for (const CTxIn& in: stakeTxIn.vin) {
 
             int nSpentBlockHeiht;
             bool fAvailable;
-            bool coin = CheckTxIn(in, fAvailable, nSpentBlockHeiht);
+            bool fStakeInput;
+            bool coin = CheckTxIn(in, fAvailable, nSpentBlockHeiht, fStakeInput);
 
             if (!coin && !isBlockFromFork) {
                 // No coins on the main chain
-                return error("%s: coin stake inputs not available on main chain, received height %d vs current %d", __func__, nHeight, pindexBest->nHeight);
+                return error("%s: [suspicious block rejected] coin stake inputs not available on main chain, received height %d vs current %d", __func__, nHeight, pindexBest->nHeight);
             }
+
             if (coin && !fAvailable) {
                 // If this is not available get the height of the spent and validate it with the forked height
                 // Check if this occurred before the chain split
-                if (!(isBlockFromFork && nSpentBlockHeiht > splitHeight)) {
-                    // Coins not available
-                    return error("%s: coin stake inputs already spent in main chain, received height %d vs spent %d", __func__, nHeight, nSpentBlockHeiht);
+                if (isBlockFromFork && nSpentBlockHeiht > splitHeight) continue;
+                if (fStakeInput) {
+                    printf("%s: [suspicious block detected, warning only] coin stake inputs already spent in main chain, received height %d vs spent %d\n", __func__, nHeight, nSpentBlockHeiht);
+                    continue;
                 }
+                // Coins not available
+                return error("%s: [suspicious block rejected] coin stake inputs already spent in main chain, received height %d vs spent %d", __func__, nHeight, nSpentBlockHeiht);
             }
         }
     }
