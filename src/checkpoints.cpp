@@ -33,9 +33,10 @@ namespace Checkpoints
         ( 100000,  uint256("0x0000000003e21d5806be69c5ac58ab49462c61020c4f86679aadbbfb948a2ba4") )
         ( 200000,  uint256("0x000000003e740863d28eadc4221f70862694801bf47a784b4a8638362f29d32b") )
         ( 300000,  uint256("0x69890e2438544f411dfc85a303d8a19adc9565379bbe7075f27019fe20efed35") )
-	( 899000,  uint256("0xc80ebc6bf383e8586529c95fdd759607b442a6a50ea747f27936294e6746196f") )
-	( 2360000,  uint256("0x1a1a661bfa9d99dfbce66ece6490a3de416a113d8cd29577874e2f9d14be824c") )
-	( 2454522,  uint256("0x8c6af75919996f7b6a3337aa06b0d8eb695157540cd55a5014a788bc98cf6f4a") )
+        ( 899000,  uint256("0xc80ebc6bf383e8586529c95fdd759607b442a6a50ea747f27936294e6746196f") )
+        ( 2360000,  uint256("0x1a1a661bfa9d99dfbce66ece6490a3de416a113d8cd29577874e2f9d14be824c") )
+        ( 2439896,  uint256("0x1f7e98043d927f3f8c51514d6bb47325bfcffb85a448fb43f9b254be43180cab") )
+        ( 2461312,  uint256("0xf1fea7ae0c53854ff4d91f0d7fb20d2f34c1baf67ebf7142219c09829d93250f") )
 ;
 
     static MapCheckpoints mapCheckpointsTestnet =
@@ -196,11 +197,11 @@ namespace Checkpoints
         return false;
     }
 
-    // Automatically select a suitable sync-checkpoint 
+    // Automatically select a suitable sync-checkpoint
     uint256 AutoSelectSyncCheckpoint()
     {
         // Proof-of-work blocks are immediately checkpointed
-        // to defend against 51% attack which rejects other miners block 
+        // to defend against 51% attack which rejects other miners block
 
         // Select the last proof-of-work block
         const CBlockIndex *pindex = GetLastBlockIndex(pindexBest, false);
@@ -245,7 +246,7 @@ namespace Checkpoints
             return false;
         if (hashBlock == hashPendingCheckpoint)
             return true;
-        if (mapOrphanBlocks.count(hashPendingCheckpoint) 
+        if (mapOrphanBlocks.count(hashPendingCheckpoint)
             && hashBlock == WantedByOrphan(mapOrphanBlocks[hashPendingCheckpoint]))
             return true;
         return false;
