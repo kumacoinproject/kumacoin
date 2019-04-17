@@ -34,12 +34,15 @@ Testnet RPC: 17585
 ***
 
 ### Download
-ウォレット<br>
-[Kumacoin-Qt Wallet for Windows](https://drive.google.com/folderview?id=0B16eh4lTx_uAQm1BSTU3RzBITHc&usp=sharing) （2016/2/27 Wallet更新）<br><br>
-マイニングソフト<br>
-[Mining Software for CPU cpuminer](http://sourceforge.net/projects/philosopherstone/files/QRK/)<br>
-[Mining Software for GPU (AMD) sph-sgminer](https://bitcointalk.org/index.php?topic=475795.0)<br>
-[Mining Software for GPU (nVidia) ccminer](https://github.com/cbuchner1/ccminer/releases)<br>
+* [Kumacoin-Qt Wallet for Windows](https://mega.nz/#!ihkHWaLb!2ezTAY6IEA1L8Co2Xl16iHUFmCHQTcuXDCZoP7YCiaY)   
+    * Increase re-organization limits to adapt large fork problem, **it's temporary** 
+    * sha256: `e8b0cff49e6809d1b53a6dfe314875c60a3787ac5eab79efa7e808e325fd5915`
+    * v0.8.9.7 (2019/04/17)
+* Mining soft (We recommend mining in ASIC)
+    * [Mining Software for CPU cpuminer](http://sourceforge.net/projects/philosopherstone/files/QRK/)
+    * [Mining Software for GPU (AMD) sph-sgminer](https://bitcointalk.org/index.php?topic=475795.0)
+    * [Mining Software for GPU (nVidia) ccminer](https://github.com/cbuchner1/ccminer/releases)
+
 ***
 
 ### kumacoin.conf設定例
@@ -55,24 +58,36 @@ server=1
 
 ***
 
-### Pool
-LA pool: <br>
-* http://kuma.xau.jp/<br>
-* http://pool2.xau.jp/<br>
+### Wiki
+[KUMACOIN WIKI](http://h2a.sakura.ne.jp/kumawiki/index.php)
+Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト、配布物など有志が纏めてくれた情報が載っています。
 
-kuma MD pool：<br>
-* http://kuma.mona-dns.info/<br>
+### Community
+[Discord invite link](https://discord.gg/KpJ4Y2u)
+
+### Block explorer
+* [https://kumabook.electrum-mona.org/](https://kumabook.electrum-mona.org/)
+* [https://miningbeaver.ga/explorer/KUMA](https://miningbeaver.ga/explorer/KUMA)
+* [http://spbird.mydns.jp/](http://spbird.mydns.jp/myexplorer2/myexplorer2.php?timezone=2&coingroupno=140)
+* [https://namuyan.tk/MultiLightBlockExplorer/](https://namuyan.tk/MultiLightBlockExplorer/index.php?page=selectcoin&coin=kuma)
+
+### Pool
+* [MiningBeaver](https://miningbeaver.ga/)
+* [mining-dutch](https://www.mining-dutch.nl/)
+* [LAPool](https://lapool.me/)
 
 ***
 
-### EXCHANGES（取引所）
-* [CRYPTOPIA](https://www.cryptopia.co.nz/Exchange/?market=KUMA_LTC)<br>
-* [もなとれ](https://monatr.jp/trade/kuma_mona)<br>
+### Exchange（取引所）
+* [Cryptopia](https://www.cryptopia.co.nz/Exchange/?market=KUMA_BTC)
+* [NovaExchange](https://novaexchange.com/market/BTC_KUMA/)
 
 ***
 
 ### 更新履歴
 ```
+・2019/04/17 MainPageのデータやリンクを修正
+    KumacoinQt v0.8.9.7 公開
 ・2016/02/27 kumacoin-qt-20160227-18.zip Wallet更新
 　　チェックポイント追加, "Checkpoint is too old..."の警告表示を削除
 ・2015/05/03 kumacoin-qt-20150503-19.zip Wallet更新
@@ -96,4 +111,5 @@ kuma MD pool：<br>
 ***
 
 ### Contact
-kumacoinproject@gmail.com
+kumacoinproject@gmail.com<br>
+反応が無い場合はDiscordにて発言して下さい。
