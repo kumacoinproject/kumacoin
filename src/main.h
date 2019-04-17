@@ -87,8 +87,8 @@ extern std::set<CWallet*> setpwalletRegistered;
 extern unsigned char pchMessageStart[4];
 extern std::map<uint256, CBlock*> mapOrphanBlocks;
 
-static const int64 MAX_REORG_DEPTH = 100;
-static const int64 MAX_ORPHAN_BLOCKS = 750;
+static const int64 MAX_REORG_DEPTH = 10000;
+static const int64 MAX_ORPHAN_BLOCKS = 75000;
 
 extern bool bRemotePaymentsEnabled;
 extern bool bOPReturnEnabled;
@@ -1138,7 +1138,7 @@ public:
     int64 nMoneySupply;
 
     unsigned int nFlags;  // ppcoin: block index flags
-    enum  
+    enum
     {
         BLOCK_PROOF_OF_STAKE = (1 << 0), // is proof-of-stake block
         BLOCK_STAKE_ENTROPY  = (1 << 1), // entropy bit for stake modifier
@@ -1336,7 +1336,7 @@ public:
             pprev, pnext, nFile, nBlockPos, nHeight,
             FormatMoney(nMint).c_str(), FormatMoney(nMoneySupply).c_str(),
             GeneratedStakeModifier() ? "MOD" : "-", GetStakeEntropyBit(), IsProofOfStake()? "PoS" : "PoW",
-            nStakeModifier, nStakeModifierChecksum, 
+            nStakeModifier, nStakeModifierChecksum,
             hashProofOfStake.ToString().c_str(),
             prevoutStake.ToString().c_str(), nStakeTime,
             hashMerkleRoot.ToString().c_str(),
