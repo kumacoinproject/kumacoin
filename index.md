@@ -34,10 +34,7 @@ Testnet RPC: 17585
 ***
 
 ### Download
-* [Kumacoin-Qt Wallet for Windows](https://github.com/kumacoinproject/kumacoin/releases/tag/v0.8.9.7-qt)   
-    * Increase re-organization limits to adapt large fork problem, **it's temporary** 
-    * sha256: `e8b0cff49e6809d1b53a6dfe314875c60a3787ac5eab79efa7e808e325fd5915`
-    * v0.8.9.7 (2019/04/17)
+* [Kumacoin-Qt Wallet for Windows](https://github.com/kumacoinproject/kumacoin/releases)
 * Mining soft (We recommend mining in ASIC)
     * [Mining Software for CPU cpuminer](http://sourceforge.net/projects/philosopherstone/files/QRK/)
     * [Mining Software for GPU (AMD) sph-sgminer](https://bitcointalk.org/index.php?topic=475795.0)
@@ -86,6 +83,8 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 
 ### 更新履歴
 ```
+・2019/04/21 KumacoinQt v0.8.9.8 公開
+    Checkpointを追加しMiningBeaverへの収束を図る
 ・2019/04/17 MainPageのデータやリンクを修正
     KumacoinQt v0.8.9.7 公開
 ・2016/02/27 kumacoin-qt-20160227-18.zip Wallet更新
