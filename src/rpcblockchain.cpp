@@ -101,7 +101,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
         {
             Object entry;
 
-            entry.push_back(Pair("txid", tx.GetHash().GetHex()));
+            //entry.push_back(Pair("txid", tx.GetHash().GetHex()));
             TxToJSON(tx, 0, entry);
 
             txinfo.push_back(entry);
@@ -233,6 +233,18 @@ Value getblockbynumber(const Array& params, bool fHelp)
 
     return blockToJSON(block, pblockindex, params.size() > 1 ? params[1].get_bool() : false);
 }
+
+Value getbestblockhash(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getbestblockhash\n"
+            "Returns the hash of blocks in the longest block chain.");
+
+    CBlockIndex* pblockindex = FindBlockByHeight(nBestHeight);
+    return pblockindex->phashBlock->GetHex();
+}
+
 
 // ppcoin: get information of sync-checkpoint
 Value getcheckpoint(const Array& params, bool fHelp)
