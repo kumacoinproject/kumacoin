@@ -101,7 +101,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
         {
             Object entry;
 
-            entry.push_back(Pair("txid", tx.GetHash().GetHex()));
+            //entry.push_back(Pair("txid", tx.GetHash().GetHex()));
             TxToJSON(tx, 0, entry);
 
             txinfo.push_back(entry);
