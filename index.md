@@ -71,18 +71,21 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 ### Pool
 * [MiningBeaver](https://miningbeaver.ga/)
 * [mining-dutch](https://www.mining-dutch.nl/)
-* [LAPool](https://lapool.me/)
+* ~~[LAPool](https://lapool.me/)~~
+* [LeyWaPool](https://leywapool.com/)
 
 ***
 
 ### Exchange（取引所）
-* [Cryptopia](https://www.cryptopia.co.nz/Exchange/?market=KUMA_BTC)
-* [NovaExchange](https://novaexchange.com/market/BTC_KUMA/)
+* ~~[Cryptopia](https://www.cryptopia.co.nz/Exchange/?market=KUMA_BTC)~~
+* ~~[NovaExchange](https://novaexchange.com/market/BTC_KUMA/)~~
 
 ***
 
 ### 更新履歴
 ```
+・2019/11/23 KumaのPoolのリストを修正 & 取引所リスト修正
+    LAPool削除、LeyWaPool追加、Cryptopia削除、Nova削除
 ・2019/04/21 KumacoinQt v0.8.9.8 公開
     Checkpointを追加しMiningBeaverへの収束を図る
 ・2019/04/17 MainPageのデータやリンクを修正
