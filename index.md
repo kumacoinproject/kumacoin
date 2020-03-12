@@ -113,5 +113,5 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 ***
 
 ### Contact
-kumacoinproject@gmail.com<br>
-反応が無い場合はDiscordにて発言して下さい。
+~~kumacoinproject@gmail.com~~<br>
+Emailはたまに見ていますので反応が遅れます。連絡がある場合はDiscordへお越しください。
