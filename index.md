@@ -67,12 +67,14 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 * [https://miningbeaver.ga/explorer/KUMA](https://miningbeaver.ga/explorer/KUMA)
 * [http://spbird.mydns.jp/](http://spbird.mydns.jp/myexplorer2/myexplorer2.php?timezone=2&coingroupno=140)
 * [https://namuyan.tk/MultiLightBlockExplorer/](https://namuyan.tk/MultiLightBlockExplorer/index.php?page=selectcoin&coin=kuma)
+* [http://explorer.scrypt.ovh/kuma/](http://explorer.scrypt.ovh/kuma/)
 
 ### Pool
 * [MiningBeaver](https://miningbeaver.ga/)
 * [mining-dutch](https://www.mining-dutch.nl/)
 * ~~[LAPool](https://lapool.me/)~~
 * [LeyWaPool](https://leywapool.com/)
+* [pool.scrypt.ovh](https://pool.scrypt.ovh/kumacoin/public/index.php?page=login)
 
 ***
 
@@ -84,6 +86,8 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 
 ### 更新履歴
 ```
+・2020/3/14 KumaのPool・BLockExplorerのリストに追加
+    2019/9のBitcoinTalkよりscrypt.ovh追加
 ・2019/11/23 KumaのPoolのリストを修正 & 取引所リスト修正
     LAPool削除、LeyWaPool追加、Cryptopia削除、Nova削除
 ・2019/04/21 KumacoinQt v0.8.9.8 公開
