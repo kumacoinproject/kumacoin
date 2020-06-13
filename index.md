@@ -75,6 +75,7 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 * ~~[LAPool](https://lapool.me/)~~
 * [LeyWaPool](https://leywapool.com/)
 * [pool.scrypt.ovh](https://pool.scrypt.ovh/kumacoin/public/index.php?page=login)
+* [mofumofu.me](https://kuma.mofumofu.me/)
 
 ***
 
@@ -86,6 +87,8 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 
 ### 更新履歴
 ```
+・2020/6/13 KumaのPool・BLockExplorerのリストに追加
+    ググったら見つけたのでMofumofume追加
 ・2020/3/14 KumaのPool・BLockExplorerのリストに追加
     2019/9のBitcoinTalkよりscrypt.ovh追加
 ・2019/11/23 KumaのPoolのリストを修正 & 取引所リスト修正
