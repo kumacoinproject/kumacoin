@@ -2580,6 +2580,10 @@ bool CBlock::AcceptBlock()
     if (nVersion < 3 && ((!fTestNet && nHeight > 14060) || (fTestNet && nHeight > 0)))
         return error("CheckBlock() : rejected nVersion < 3 block");
 
+    // HardFork from height 3086001, reject block.nVersion < 5 except testnet
+    if (!fTestNet && 3086001 <= nHeight && nVersion < 5)
+        return DoS(100, error("CheckBlock() : (hard fork) reject nVersion < 5 block from height 3086001"));
+
     // Enforce rule that the coinbase starts with serialized block height
     CScript expect = CScript() << nHeight;
     if (!std::equal(expect.begin(), expect.end(), vtx[0].vin[0].scriptSig.begin()))
