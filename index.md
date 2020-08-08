@@ -7,6 +7,12 @@ PoW+PoSを採用し、マシンパワーを使ってのコイン採掘に加え�
 
 ***
 
+### notification
+**重要！**
+Kumacoinは**3086001**よりハードフォークを行います。
+このブロック高に到達するまでにクライアントソフトの更新をお願いします（v0899～)。
+クライアントソフトは[こちら](https://github.com/kumacoinproject/kumacoin/releases)よりDLして下さい。
+
 ### Specifications
 ```
 アルゴリスム：Quark
@@ -87,6 +93,8 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 
 ### 更新履歴
 ```
+・2020/08/08 Kumaのハードフォーク情報を追加
+    3086001よりBlockVerが5以上でないと受け入れない仕様に変更
 ・2020/6/13 KumaのPool・BLockExplorerのリストに追加
     ググったら見つけたのでMofumofume追加
 ・2020/3/14 KumaのPool・BLockExplorerのリストに追加
