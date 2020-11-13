@@ -74,6 +74,7 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 * [http://spbird.mydns.jp/](http://spbird.mydns.jp/myexplorer2/myexplorer2.php?timezone=2&coingroupno=140)
 * [https://namuyan.tk/MultiLightBlockExplorer/](https://namuyan.tk/MultiLightBlockExplorer/index.php?page=selectcoin&coin=kuma)
 * [http://explorer.scrypt.ovh/kuma/](http://explorer.scrypt.ovh/kuma/)
+* [https://kuma.exprola.com/](https://kuma.exprola.com/)
 
 ### Pool
 * [MiningBeaver](https://miningbeaver.ga/)
@@ -93,6 +94,8 @@ Kumaについて、コンパイルのやり方、Kumacoinが使えるサイト�
 
 ### 更新履歴
 ```
+・2020/11/13 KumaのPool・BLockExplorerのリストに追加
+    Discoよりexprola追加
 ・2020/08/08 Kumaのハードフォーク情報を追加
     3086001よりBlockVerが5以上でないと受け入れない仕様に変更
 ・2020/6/13 KumaのPool・BLockExplorerのリストに追加
